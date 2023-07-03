@@ -1,5 +1,12 @@
+import { TestComponent } from "@/components/TestComponent";
+
 const Home = () => {
-  return <div>Home</div>;
+  return (
+    <>
+      <h1>Home</h1>
+      <TestComponent />;
+    </>
+  );
 };
 
 export default Home;
