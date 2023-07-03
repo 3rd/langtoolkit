@@ -10,7 +10,7 @@ const config = {
   },
   h3: { classes: "scroll-m-20 text-2xl font-semibold tracking-tight", component: "h3" },
   h4: { classes: "scroll-m-20 text-xl font-semibold tracking-tight", component: "h4" },
-  p: { classes: "leading-7 [&:not(:first-child)]:mt-6", component: "p" },
+  paragraph: { classes: "leading-7 [&:not(:first-child)]:mt-6", component: "p" },
   code: {
     classes: "relative rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm font-semibold",
     component: "code",
@@ -29,7 +29,7 @@ export type TextProps = {
   variant?: keyof typeof config;
 };
 
-export const Text = ({ children, className, component, variant = "p" }: TextProps) => {
+export const Text = ({ children, className, component, variant = "paragraph" }: TextProps) => {
   return React.createElement(
     component ?? config[variant].component,
     {
