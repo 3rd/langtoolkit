@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { type ClassValue } from "clsx";
 import React from "react";
 
 const config = {
@@ -23,7 +24,7 @@ const config = {
 
 export type TextProps = {
   children?: React.ReactNode;
-  className?: string;
+  className?: ClassValue | ClassValue[];
   component?: keyof HTMLElementTagNameMap;
   variant?: keyof typeof config;
 };
