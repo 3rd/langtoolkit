@@ -3,11 +3,11 @@ import { Playground } from "./Playground";
 import type { PlaygroundProps } from "./Playground";
 
 const meta: Meta<typeof Playground> = {
-  title: "Playground",
+  title: "Playground/Playground",
   component: Playground,
   decorators: [
     (Story) => (
-      <div className="flex absolute top-0 left-0 p-4 w-full h-full">
+      <div className="flex absolute top-0 left-0 p-4 w-[100vw] h-[100vh]">
         <Story />
       </div>
     ),

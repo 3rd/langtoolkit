@@ -23,8 +23,8 @@ export const Default: Story = {
           <p>Card Content</p>
         </Card.Content>
         <Card.Footer className="flex justify-between">
-          <Button variant="outline">Cancel</Button>
           <Button>Deploy</Button>
+          <Button variant="destructive">Cancel</Button>
         </Card.Footer>
       </>
     ),
