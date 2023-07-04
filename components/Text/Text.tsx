@@ -1,6 +1,6 @@
 import React from "react";
 import { cn } from "@/lib/utils";
-import { type ClassValue } from "clsx";
+import type { ClassValue } from "clsx";
 
 const config = {
   h1: { classes: "scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl", component: "h1" },
@@ -27,10 +27,11 @@ export type TextProps = {
   className?: ClassValue | ClassValue[];
   component?: keyof HTMLElementTagNameMap;
   variant?: keyof typeof config;
+  noWrap?: boolean;
 };
 
-export const Text = ({ children, className, component, variant = "paragraph" }: TextProps) => {
-  const classes = cn(config[variant].classes, className);
+export const Text = ({ children, className, component, variant = "paragraph", noWrap }: TextProps) => {
+  const classes = cn(config[variant].classes, { "whitespace-nowrap": noWrap }, className);
 
   return React.createElement(component ?? config[variant].component, { className: classes }, children);
 };

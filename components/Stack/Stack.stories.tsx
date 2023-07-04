@@ -11,10 +11,10 @@ export default meta;
 type Story = StoryObj<StackProps>;
 
 const children = [
-  <div key={1} className="w-20 h-20 bg-red-500" />,
-  <div key={2} className="w-20 h-20 bg-blue-500" />,
-  <div key={3} className="w-20 h-20 bg-green-500" />,
-  <div key={4} className="w-20 h-20 bg-yellow-500" />,
+  <div className="w-20 h-20 bg-red-500" key={1} />,
+  <div className="w-20 h-20 bg-blue-500" key={2} />,
+  <div className="w-20 h-20 bg-green-500" key={3} />,
+  <div className="w-20 h-20 bg-yellow-500" key={4} />,
 ];
 
 export const Default: Story = {

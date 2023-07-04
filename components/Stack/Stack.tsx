@@ -1,13 +1,13 @@
 import React from "react";
 import { cn } from "@/lib/utils";
-import { type ClassValue } from "clsx";
+import type { ClassValue } from "clsx";
 
 export type StackProps = {
   children?: React.ReactNode;
   className?: ClassValue | ClassValue[];
-  direction?: "row" | "row-reverse" | "column" | "column-reverse";
-  align?: "start" | "center" | "end" | "baseline" | "stretch";
-  justify?: "start" | "center" | "end" | "between" | "around" | "evenly";
+  direction?: "column-reverse" | "column" | "row-reverse" | "row";
+  align?: "baseline" | "center" | "end" | "start" | "stretch";
+  justify?: "around" | "between" | "center" | "end" | "evenly" | "start";
   gap?: number;
 };
 
