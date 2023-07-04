@@ -26,8 +26,8 @@ export const WithInputs: Story = {
     prompt: [
       "Your task is to write an email to relay information in a professional manner.",
       "Recipient: {{recipient}}",
-      "Context: {{context}}",
-      "Information: {{message}}",
+      "Context:\n{{context}}",
+      "Information:\n{{message}}",
       "\nResult:",
     ].join("\n"),
     inputs: [

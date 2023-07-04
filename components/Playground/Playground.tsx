@@ -1,4 +1,7 @@
 import { useCallback, useMemo } from "react";
+import { DotsHorizontalIcon, PlayIcon } from "@radix-ui/react-icons";
+import type { TaskInput, TaskInputValue, TaskModel } from "@/types";
+import { models } from "@/config/models";
 import { Label } from "@/components/Label";
 import { Stack } from "@/components/Stack";
 import { Textarea } from "@/components/Textarea";
@@ -15,8 +18,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/Select";
-import type { TaskInput, TaskInputValue, TaskModel } from "@/types";
-import { models } from "@/config/models";
+import { Separator } from "@/components/Separator";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/DropdownMenu";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../Tabs";
 
 const modeGroups = [
   {
@@ -41,7 +51,7 @@ const modeGroups = [
 
 export type PlaygroundProps = {
   prompt?: string;
-  inputs?: TaskInput[];
+  inputs?: TaskInput[]; // TODO: change to schema object
   onPromptChange?: (prompt: string) => void;
   onInputChange?: (key: string, value: TaskInputValue) => void;
 };
@@ -77,9 +87,7 @@ export const Playground = ({ prompt, inputs, onPromptChange, onInputChange }: Pl
           )}
           {/* textarea */}
           {input.type === "text" && input.multiline && (
-            <Textarea id={id} onChange={handleChange} placeholder="">
-              {input.value}
-            </Textarea>
+            <Textarea id={id} onChange={handleChange} placeholder="" value={input.value} />
           )}
         </Stack>
       );
@@ -117,11 +125,11 @@ export const Playground = ({ prompt, inputs, onPromptChange, onInputChange }: Pl
       return acc;
     }, {});
 
-    const items = Object.entries(groups).map(([group, models]) => {
+    const items = Object.entries(groups).map(([group, groupModels]) => {
       return (
         <SelectGroup key={group}>
           <SelectLabel>{group}</SelectLabel>
-          {models.map((model) => {
+          {groupModels.map((model) => {
             return (
               <SelectItem key={model.id} value={model.id}>
                 {model.label}
@@ -139,59 +147,116 @@ export const Playground = ({ prompt, inputs, onPromptChange, onInputChange }: Pl
   }, []);
 
   return (
-    <Stack className="flex-1" gap={4}>
-      {/* left */}
-      <Stack className="flex-1" direction="column" gap={4}>
-        {/* prompt */}
-        <Stack className="flex-1" direction="column">
-          <Label htmlFor="prompt">
-            <Text>Prompt</Text>
-          </Label>
-          <Textarea className="flex-1" id="prompt" onChange={handlePromptChange} placeholder="Prompt" value={prompt} />
-        </Stack>
-        {/* inputs */}
-        {Array.isArray(inputs) && inputs.length > 0 && (
-          <Stack direction="column">
-            <Label>
-              <Text>Inputs</Text>
-            </Label>
-            <Card className="p-2 px-3">
-              <Stack direction="column" gap={1}>
-                {inputFields}
-              </Stack>
-            </Card>
-          </Stack>
-        )}
-        {/* actions */}
-        <Stack align="start" direction="column">
-          <Button>Submit</Button>
+    <Stack className="flex-1" direction="column">
+      {/* header */}
+      <Stack align="center" className="p-2" justify="between">
+        {/* heading */}
+        <Text variant="h3">Playground</Text>
+
+        {/* menu */}
+        <Stack gap={2}>
+          <Button variant="secondary">Save</Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="secondary">
+                <span className="sr-only">Actions</span>
+                <DotsHorizontalIcon className="w-4 h-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem>Content filter preferences</DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem className="text-red-600">Delete preset</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </Stack>
       </Stack>
-      {/* right */}
-      <Stack className="min-w-[200px]" direction="column" gap={2}>
-        {/* mode */}
-        <Stack direction="column">
-          <Label>
-            <Text>Mode</Text>
-          </Label>
-          <Select value={modeSelectEntries.default}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>{modeSelectEntries.items}</SelectContent>
-          </Select>
+
+      <Separator />
+
+      {/* content */}
+      <Stack className="flex-1 p-2 py-4" gap={4}>
+        {/* left */}
+        <Stack className="flex-1" direction="column" gap={4}>
+          {/* tabs */}
+          <Tabs className="flex flex-col flex-1" defaultValue="prompt">
+            <TabsList className="block">
+              <TabsTrigger value="prompt">Prompt</TabsTrigger>
+              <TabsTrigger value="schema">Schema</TabsTrigger>
+            </TabsList>
+
+            {/* prompt tab */}
+            <TabsContent asChild value="prompt">
+              <Stack className="flex-1" direction="column" gap={4}>
+                {/* prompt textarea */}
+                <Stack className="flex-1" direction="column">
+                  <Textarea
+                    className="flex-1"
+                    id="prompt"
+                    onChange={handlePromptChange}
+                    placeholder="Prompt"
+                    value={prompt}
+                  />
+                </Stack>
+
+                {/* inputs */}
+                {Array.isArray(inputs) && inputs.length > 0 && (
+                  <Stack direction="column">
+                    <Label>
+                      <Text>Inputs</Text>
+                    </Label>
+                    <Card className="p-2 px-3">
+                      <Stack direction="column" gap={1}>
+                        {inputFields}
+                      </Stack>
+                    </Card>
+                  </Stack>
+                )}
+
+                {/* actions */}
+                <Stack align="start" direction="column">
+                  <Button>
+                    <PlayIcon className="mr-2" />
+                    Run
+                  </Button>
+                </Stack>
+              </Stack>
+            </TabsContent>
+
+            {/* schema tab */}
+            <TabsContent asChild value="schema">
+              <Text>Schema</Text>
+            </TabsContent>
+          </Tabs>
         </Stack>
-        {/* model */}
-        <Stack direction="column">
-          <Label>
-            <Text>Model</Text>
-          </Label>
-          <Select value={modelSelectEntries.default}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>{modelSelectEntries.items}</SelectContent>
-          </Select>
+
+        {/* right */}
+        <Stack className="min-w-[200px]" direction="column" gap={2}>
+          {/* mode */}
+          <Stack direction="column">
+            <Label>
+              <Text>Mode</Text>
+            </Label>
+            <Select value={modeSelectEntries.default}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>{modeSelectEntries.items}</SelectContent>
+            </Select>
+          </Stack>
+
+          {/* model */}
+          <Stack direction="column">
+            <Label>
+              <Text>Model</Text>
+            </Label>
+            <Select value={modelSelectEntries.default}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>{modelSelectEntries.items}</SelectContent>
+            </Select>
+          </Stack>
         </Stack>
       </Stack>
     </Stack>
