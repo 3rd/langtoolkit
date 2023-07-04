@@ -11,29 +11,37 @@ export type StackProps = {
   gap?: number;
 };
 
-export const Stack = ({ align, justify, children, className, direction, gap }: StackProps) => {
-  const classes = cn(
-    "flex",
-    {
-      "flex-row": direction === "row",
-      "flex-row-reverse": direction === "row-reverse",
-      "flex-col": direction === "column",
-      "flex-col-reverse": direction === "column-reverse",
-      "items-start": align === "start",
-      "items-center": align === "center",
-      "items-end": align === "end",
-      "items-baseline": align === "baseline",
-      "items-stretch": align === "stretch",
-      "justify-start": justify === "start",
-      "justify-center": justify === "center",
-      "justify-end": justify === "end",
-      "justify-between": justify === "between",
-      "justify-around": justify === "around",
-      "justify-evenly": justify === "evenly",
-    },
-    Number.isFinite(gap) && `gap-${gap}`,
-    className
-  );
+export const Stack = React.forwardRef<HTMLDivElement, StackProps>(
+  ({ align, justify, children, className, direction, gap }, ref) => {
+    const classes = cn(
+      "flex",
+      {
+        "flex-row": direction === "row",
+        "flex-row-reverse": direction === "row-reverse",
+        "flex-col": direction === "column",
+        "flex-col-reverse": direction === "column-reverse",
+        "items-start": align === "start",
+        "items-center": align === "center",
+        "items-end": align === "end",
+        "items-baseline": align === "baseline",
+        "items-stretch": align === "stretch",
+        "justify-start": justify === "start",
+        "justify-center": justify === "center",
+        "justify-end": justify === "end",
+        "justify-between": justify === "between",
+        "justify-around": justify === "around",
+        "justify-evenly": justify === "evenly",
+      },
+      Number.isFinite(gap) && `gap-${gap}`,
+      className
+    );
 
-  return <div className={classes}>{children}</div>;
-};
+    return (
+      <div className={classes} ref={ref}>
+        {children}
+      </div>
+    );
+  }
+);
+
+Stack.displayName = "Stack";

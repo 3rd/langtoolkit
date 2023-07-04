@@ -30,8 +30,12 @@ export type TextProps = {
   noWrap?: boolean;
 };
 
-export const Text = ({ children, className, component, variant = "paragraph", noWrap }: TextProps) => {
-  const classes = cn(config[variant].classes, { "whitespace-nowrap": noWrap }, className);
+export const Text = React.forwardRef<HTMLElement, TextProps>(
+  ({ children, className, component, variant = "paragraph", noWrap }, ref) => {
+    const classes = cn(config[variant].classes, { "whitespace-nowrap": noWrap }, className);
 
-  return React.createElement(component ?? config[variant].component, { className: classes }, children);
-};
+    return React.createElement(component ?? config[variant].component, { className: classes, ref }, children);
+  }
+);
+
+Text.displayName = "Text";
