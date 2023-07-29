@@ -9,7 +9,8 @@
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build"
+    "build-storybook": "storybook build",
+    "gen": "pocketbase-typegen --db ../backend/pb_data/data.db --out src/api/types.ts"
   },
   "dependencies": {
     "@emotion/react": "^11.11.1",
@@ -29,10 +30,15 @@
     "@tiptap/react": "^2.0.3",
     "@tiptap/starter-kit": "^2.0.3",
     "dayjs": "^1.11.9",
+    "lodash": "^4.17.21",
     "lucide-react": "^0.260.0",
+    "nanoid": "^4.0.2",
+    "pocketbase": "^0.15.3",
+    "pocketbase-typegen": "^1.1.11",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-router-dom": "^6.14.1"
+    "react-router-dom": "^6.14.1",
+    "zod": "^3.21.4"
   },
   "devDependencies": {
     "@storybook/addon-essentials": "^7.0.27",
@@ -42,6 +48,7 @@
     "@storybook/react": "^7.0.27",
     "@storybook/react-vite": "^7.0.27",
     "@storybook/testing-library": "^0.2.0",
+    "@types/lodash": "^4.14.196",
     "@types/react": "^18.2.15",
     "@types/react-dom": "^18.2.7",
     "@typescript-eslint/eslint-plugin": "^6.0.0",

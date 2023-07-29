@@ -3,8 +3,9 @@ import { MantineProvider, ColorSchemeProvider, ColorScheme } from "@mantine/core
 import { useColorScheme, useLocalStorage } from "@mantine/hooks";
 import { RouterProvider } from "react-router-dom";
 
-import { router } from "./router";
-import { theme } from "./theme";
+import { UserProvider } from "@/providers/AuthProvider";
+import { router } from "@/router";
+import { theme } from "@/theme";
 
 export const App = () => {
   // color scheme
@@ -21,11 +22,13 @@ export const App = () => {
   };
 
   return (
-    <ColorSchemeProvider colorScheme={colorScheme} toggleColorScheme={toggleColorScheme}>
-      <MantineProvider theme={{ ...theme, colorScheme }} withGlobalStyles withNormalizeCSS>
-        <RouterProvider router={router} />
-      </MantineProvider>
-    </ColorSchemeProvider>
+    <UserProvider>
+      <ColorSchemeProvider colorScheme={colorScheme} toggleColorScheme={toggleColorScheme}>
+        <MantineProvider theme={{ ...theme, colorScheme }} withGlobalStyles withNormalizeCSS>
+          <RouterProvider router={router} />
+        </MantineProvider>
+      </ColorSchemeProvider>
+    </UserProvider>
   );
 };
 
