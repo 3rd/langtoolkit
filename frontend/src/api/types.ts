@@ -3,6 +3,7 @@
 */
 
 export enum Collections {
+	Completions = "completions",
 	Settings = "settings",
 	Users = "users",
 }
@@ -31,6 +32,31 @@ export type AuthSystemFields<T = never> = {
 
 // Record types for each collection
 
+export enum CompletionsStatusOptions {
+	"pending" = "pending",
+	"success" = "success",
+	"error" = "error",
+}
+
+export enum CompletionsSourceOptions {
+	"playground" = "playground",
+	"app" = "app",
+	"api" = "api",
+}
+export type CompletionsRecord<Tinput = unknown, Tparameters = unknown, Tresponse = unknown> = {
+	vendor: string
+	model: string
+	input: null | Tinput
+	status: CompletionsStatusOptions
+	user: RecordIdString
+	source: CompletionsSourceOptions
+	parameters?: null | Tparameters
+	response?: null | Tresponse
+	error?: string
+	consumedAt?: IsoDateString
+	resolvedAt?: IsoDateString
+}
+
 export type SettingsRecord<Tvalue = unknown> = {
 	key: string
 	value?: null | Tvalue
@@ -47,17 +73,20 @@ export type UsersRecord = {
 }
 
 // Response types include system fields and match responses from the PocketBase API
+export type CompletionsResponse<Tinput = unknown, Tparameters = unknown, Tresponse = unknown, Texpand = unknown> = Required<CompletionsRecord<Tinput, Tparameters, Tresponse>> & BaseSystemFields<Texpand>
 export type SettingsResponse<Tvalue = unknown, Texpand = unknown> = Required<SettingsRecord<Tvalue>> & BaseSystemFields<Texpand>
 export type UsersResponse<Texpand = unknown> = Required<UsersRecord> & AuthSystemFields<Texpand>
 
 // Types containing all Records and Responses, useful for creating typing helper functions
 
 export type CollectionRecords = {
+	completions: CompletionsRecord
 	settings: SettingsRecord
 	users: UsersRecord
 }
 
 export type CollectionResponses = {
+	completions: CompletionsResponse
 	settings: SettingsResponse
 	users: UsersResponse
 }

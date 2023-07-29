@@ -1,5 +1,5 @@
-import { Box, Textarea } from "@mantine/core";
 import { memo } from "react";
+import { Box, Textarea } from "@mantine/core";
 
 export interface CompletionInputProps {
   value: string;
@@ -16,7 +16,7 @@ export const CompletionInput = memo(({ value, onChange }: CompletionInputProps) 
       })}
     >
       <Textarea
-        placeholder="Act as if want to make a difference..."
+        placeholder="Act as if you want to make a difference..."
         size="md"
         styles={{
           root: { height: "100%" },

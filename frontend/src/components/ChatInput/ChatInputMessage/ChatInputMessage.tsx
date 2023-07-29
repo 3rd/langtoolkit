@@ -95,7 +95,7 @@ export const ChatInputMessage = ({ role, text, availableRoles, onChange, onDelet
             />
 
             {/* delete button */}
-            <ActionIcon aria-label="Delete message" variant="light" onClick={onDelete}>
+            <ActionIcon disabled={!onDelete} aria-label="Delete message" variant="light" onClick={onDelete}>
               <IconTrash size="1rem" />
             </ActionIcon>
           </Flex>

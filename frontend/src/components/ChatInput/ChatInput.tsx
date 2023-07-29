@@ -18,7 +18,7 @@ export const ChatInput = ({ messages, roles, onChangeMessage, onDeleteMessage, o
   const handleMessageChange = (messageId: string, role: string, text: string) =>
     onChangeMessage({ id: messageId, role, text });
 
-  const messageItems = messages.map((message) => {
+  const messageItems = messages.map((message, index) => {
     const handleChange = (role: string, text: string) => handleMessageChange(message.id, role, text);
     const handleDelete = () => onDeleteMessage(message.id);
 
@@ -28,7 +28,7 @@ export const ChatInput = ({ messages, roles, onChangeMessage, onDeleteMessage, o
         {...message}
         availableRoles={roles}
         onChange={handleChange}
-        onDelete={handleDelete}
+        onDelete={index > 0 ? handleDelete : undefined}
       />
     );
   });

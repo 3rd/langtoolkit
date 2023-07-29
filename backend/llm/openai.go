@@ -6,31 +6,65 @@ import (
 	openai "github.com/sashabaranov/go-openai"
 )
 
-func CompleteOpenAI(apiKey string, messages []Message, config *map[string]interface{}) (string, error) {
-	openAIMessages := make([]openai.ChatCompletionMessage, len(messages))
-	for i, message := range messages {
+var DefaultModel = openai.GPT3Dot5Turbo0613
+var DefaultMaxTokens = 0
+var DefaultTemperature float32 = 0.7
+var DefaultTopP float32 = 1
+
+func ComputeOpenAICompletionConfig(request *CompletionRequest) openai.ChatCompletionRequest {
+	config := openai.ChatCompletionRequest{
+		Model:       request.Model,
+		MaxTokens:   DefaultMaxTokens,
+		Temperature: DefaultTemperature,
+		TopP:        DefaultTopP,
+	}
+
+	if request.Stream != nil {
+		config.Stream = *request.Stream
+	}
+
+	// params
+	if request.Parameters.MaxTokens != nil {
+		config.MaxTokens = *request.Parameters.MaxTokens
+	}
+	if request.Parameters.Temperature != nil {
+		config.Temperature = *request.Parameters.Temperature
+	}
+	if request.Parameters.TopP != nil {
+		config.TopP = *request.Parameters.TopP
+	}
+	if request.Parameters.PresencePenalty != nil {
+		config.PresencePenalty = *request.Parameters.PresencePenalty
+	}
+	if request.Parameters.FrequencyPenalty != nil {
+		config.FrequencyPenalty = *request.Parameters.FrequencyPenalty
+	}
+	if request.Parameters.Stop != nil {
+		config.Stop = *request.Parameters.Stop
+	}
+
+	return config
+}
+
+func CompleteOpenAI(apiKey string, request *CompletionRequest) (*openai.ChatCompletionResponse, error) {
+	// transform messages
+	openAIMessages := make([]openai.ChatCompletionMessage, len(request.Messages))
+	for i, message := range request.Messages {
 		openAIMessages[i] = openai.ChatCompletionMessage{
 			Role:    message.Role,
 			Content: message.Text,
 		}
 	}
 
+	config := ComputeOpenAICompletionConfig(request)
+	config.Messages = openAIMessages
+
 	client := openai.NewClient(apiKey)
-	res, err := client.CreateChatCompletion(
-		context.Background(),
-		openai.ChatCompletionRequest{
-			Model:            openai.GPT3Dot5Turbo,
-			Messages:         openAIMessages,
-			MaxTokens:        500,
-			Stream:           false,
-			Temperature:      0.7,
-			PresencePenalty:  0.05,
-			FrequencyPenalty: 0,
-		})
+	res, err := client.CreateChatCompletion(context.Background(), config)
 
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	return res.Choices[0].Message.Content, nil
+	return &res, nil
 }

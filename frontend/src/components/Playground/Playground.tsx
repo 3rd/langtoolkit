@@ -1,6 +1,6 @@
-import { useCallback, useMemo, useState } from "react";
-import { ScrollArea, Box, Stack, Flex, Text, Select, TextInput, Button, Group } from "@mantine/core";
-import { useForm, zodResolver } from "@mantine/form";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { ScrollArea, Box, Stack, Flex, Text, Select, TextInput, Button, Group, Textarea } from "@mantine/core";
+import { UseFormReturnType } from "@mantine/form";
 import { z } from "zod";
 import { ChatInput, ChatInputProps } from "../ChatInput";
 import { nanoid } from "nanoid";
@@ -12,14 +12,8 @@ const modes = [
   { value: "chat", label: "Chat", icon: <IconMessageChatbot /> },
 ];
 
-const models = [
-  { value: "gpt-4", label: "gpt-4" },
-  { value: "gpt-3.5-turbo-16k", label: "gpt-3.5-turbo-16k" },
-  { value: "gpt-3.5-turbo", label: "gpt-3.5-turbo" },
-];
-
-const schema = z.object({
-  mode: z.string(),
+export const schema = z.object({
+  mode: z.union([z.literal("complete"), z.literal("chat")]),
   model: z.string(),
   temperature: z.coerce.number().min(0).max(1).optional(),
   topP: z.coerce.number().min(0).max(1).optional(),
@@ -39,28 +33,20 @@ const schema = z.object({
   ),
 });
 
+export type PlaygroundModel = { value: string; label: string };
+export type PlaygroundStatus = "idle" | "loading" | "error";
+export type PlaygroundRequest = z.infer<typeof schema>;
+
 export interface PlaygroundProps {
+  models: PlaygroundModel[];
   roles: string[];
+  form: UseFormReturnType<z.infer<typeof schema>>;
+  status?: PlaygroundStatus;
+  onSubmit?: (values: PlaygroundRequest) => void;
 }
 
-export const Playground = ({ roles }: PlaygroundProps) => {
-  const form = useForm({
-    initialValues: {
-      mode: modes[0]?.value ?? "",
-      model: models[0]?.value ?? "",
-      temperature: 0.75,
-      topP: 1,
-      stopSequences: [],
-      messages: [{ id: nanoid(), role: roles[0], text: "" }],
-      frequencyPenalty: 0,
-      presencePenalty: 0,
-      maxTokens: "",
-    } as z.infer<typeof schema>,
-    validate: zodResolver(schema),
-  });
+export const Playground = ({ form, models, status, onSubmit, roles }: PlaygroundProps) => {
   const [newStopSequence, setNewStopSequence] = useState("");
-
-  // useDebugRender({ newStopSequence });
 
   const handleAddStopSequence = () => {
     if (!newStopSequence) return;
@@ -76,53 +62,43 @@ export const Playground = ({ roles }: PlaygroundProps) => {
 
   const handleCompletionInput = useCallback(
     (value: string) => {
-      form.setFieldValue("messages", [{ id: nanoid(), role: roles[0], text: value }]);
+      form.setFieldValue("messages.0", { id: nanoid(), role: roles[0], text: value });
     },
     [form, roles]
   );
 
   const handleSubmit = (values: z.infer<typeof schema>) => {
-    console.log(schema.parse(values));
+    if (status === "loading") return;
+    onSubmit?.(schema.parse(values));
+  };
+
+  const handleChangeMessage = (message: ChatInputProps["messages"][number]) => {
+    const updatedMessages = form.values.messages.map((m) => (m.id === message.id ? message : m));
+    form.setFieldValue("messages", updatedMessages);
+  };
+  const handleDeleteMessage = (messageId: string) => {
+    if (form.values.messages.length === 1) return;
+    const updatedMessages = form.values.messages.filter((m) => m.id !== messageId);
+    form.setFieldValue("messages", updatedMessages);
+  };
+  const handleNewMessage = () => {
+    const updatedMessages = [...form.values.messages, { id: nanoid(), role: roles[0], text: "" }];
+    form.setFieldValue("messages", updatedMessages);
   };
 
   // TODO: UX - only keep the first message when switching from chat to complete?
   // request user confirmation?
   // could keep the rest of the messages but not use them in the call
-  const promptInput = useMemo(() => {
-    if (form.values.mode === "complete") {
-      return (
-        <>
-          <CompletionInput value={form.values.messages[0]?.text ?? ""} onChange={handleCompletionInput} />
-        </>
-      );
-    }
+  const firstMessage = form.values.messages[0];
 
-    const handleChangeMessage = (message: ChatInputProps["messages"][number]) => {
-      const updatedMessages = form.values.messages.map((m) => (m.id === message.id ? message : m));
-      form.setFieldValue("messages", updatedMessages);
-    };
-    const handleDeleteMessage = (messageId: string) => {
-      const updatedMessages = form.values.messages.filter((m) => m.id !== messageId);
-      form.setFieldValue("messages", updatedMessages);
-    };
-    const handleNewMessage = () => {
-      const updatedMessages = [...form.values.messages, { id: nanoid(), role: roles[0], text: "" }];
-      form.setFieldValue("messages", updatedMessages);
-    };
+  const outputArea = useMemo(() => {
+    if (form.values.mode !== "complete") return null;
+    if (form.values.messages.length < 2 || form.values.messages[1].role !== "system") return null;
 
-    if (form.values.mode === "chat") {
-      return (
-        <ChatInput
-          messages={form.values.messages}
-          roles={roles}
-          onChangeMessage={handleChangeMessage}
-          onDeleteMessage={handleDeleteMessage}
-          onNewMessage={handleNewMessage}
-        />
-      );
-    }
-    return null;
-  }, [form, handleCompletionInput, roles]);
+    const value = form.values.messages[1].text;
+
+    return <Textarea value={value} label="Output" minRows={14} readOnly />;
+  }, [form]);
 
   return (
     <Stack sx={{ flex: 1, overflow: "hidden", height: "100%", paddingBottom: "2rem" }}>
@@ -131,6 +107,7 @@ export const Playground = ({ roles }: PlaygroundProps) => {
         <Flex gap="md" sx={{ flex: 1 }}>
           {/* left */}
           <Stack sx={{ flex: 1 }}>
+            {/* input */}
             <ScrollArea
               styles={(theme) => ({
                 root: {
@@ -151,12 +128,26 @@ export const Playground = ({ roles }: PlaygroundProps) => {
                 },
               })}
             >
-              {promptInput}
+              {form.values.mode === "complete" && (
+                <CompletionInput value={firstMessage.text} onChange={handleCompletionInput} />
+              )}
+              {form.values.mode === "chat" && (
+                <ChatInput
+                  messages={form.values.messages}
+                  roles={roles}
+                  onChangeMessage={handleChangeMessage}
+                  onDeleteMessage={handleDeleteMessage}
+                  onNewMessage={handleNewMessage}
+                />
+              )}
             </ScrollArea>
+
+            {/* output */}
+            {outputArea}
 
             {/* actions */}
             <Flex gap="md">
-              <Button color="blue" type="submit">
+              <Button loading={status === "loading"} color="blue" type="submit">
                 Submit
               </Button>
               <Button color="red" onClick={form.reset}>
