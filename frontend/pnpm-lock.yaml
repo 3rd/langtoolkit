@@ -8,6 +8,9 @@ dependencies:
   '@emotion/react':
     specifier: ^11.11.1
     version: 11.11.1(@types/react@18.2.15)(react@18.2.0)
+  '@formkit/auto-animate':
+    specifier: ^0.7.0
+    version: 0.7.0
   '@mantine/core':
     specifier: ^6.0.16
     version: 6.0.16(@emotion/react@11.11.1)(@mantine/hooks@6.0.16)(@types/react@18.2.15)(react-dom@18.2.0)(react@18.2.0)
@@ -62,6 +65,9 @@ dependencies:
   lucide-react:
     specifier: ^0.260.0
     version: 0.260.0(react@18.2.0)
+  mantine-datatable:
+    specifier: ^2.9.1
+    version: 2.9.1(@mantine/core@6.0.16)(@mantine/hooks@6.0.16)(react@18.2.0)
   nanoid:
     specifier: ^4.0.2
     version: 4.0.2
@@ -3035,6 +3041,10 @@ packages:
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
       tabbable: 6.2.0
+    dev: false
+
+  /@formkit/auto-animate@0.7.0:
+    resolution: {integrity: sha512-RczHUr0AhRPssREoNdRjLfk2b/id9/DFnbIq18QM8L7E4zNV3XH+WO480EZ46BQHDEsv76YPJ0JbG2Y2i3GfXw==}
     dev: false
 
   /@gar/promisify@1.1.3:
@@ -8128,6 +8138,18 @@ packages:
     dependencies:
       tmpl: 1.0.5
     dev: true
+
+  /mantine-datatable@2.9.1(@mantine/core@6.0.16)(@mantine/hooks@6.0.16)(react@18.2.0):
+    resolution: {integrity: sha512-ZUf6C4+mDMcrzm652pGkFBmcGk8aomXQaiHy9+QFb3BEfQ5X+CpCd4Ahn3aYWOuLQ1u1pz8T05OM+2yEIJD7cw==}
+    peerDependencies:
+      '@mantine/core': '>=6'
+      '@mantine/hooks': '>=6'
+      react: '>=18'
+    dependencies:
+      '@mantine/core': 6.0.16(@emotion/react@11.11.1)(@mantine/hooks@6.0.16)(@types/react@18.2.15)(react-dom@18.2.0)(react@18.2.0)
+      '@mantine/hooks': 6.0.16(react@18.2.0)
+      react: 18.2.0
+    dev: false
 
   /map-or-similar@1.5.0:
     resolution: {integrity: sha512-0aF7ZmVon1igznGI4VS30yugpduQW3y3GkcgGJOp7d8x8QrizhigUxjI/m2UojsXXto+jLAH3KSz+xOJTiORjg==}

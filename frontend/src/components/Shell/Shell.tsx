@@ -17,6 +17,7 @@ import {
   useMantineColorScheme,
   Flex,
   Avatar,
+  Global,
 } from "@mantine/core";
 import { NavLink, Location } from "react-router-dom";
 import {
@@ -224,17 +225,32 @@ export const Shell = ({ children, user, onLogout }: ShellProps) => {
   );
 
   return (
-    <AppShell
-      header={header}
-      navbar={navbar}
-      navbarOffsetBreakpoint="sm"
-      styles={{
-        main: {
-          background: theme.colorScheme === "dark" ? theme.colors.dark[8] : theme.colors.gray[0],
-        },
-      }}
-    >
-      {children}
-    </AppShell>
+    <>
+      <AppShell
+        header={header}
+        navbar={navbar}
+        navbarOffsetBreakpoint="sm"
+        styles={{
+          root: {
+            flex: 1,
+            background: theme.colorScheme === "dark" ? theme.colors.dark[8] : theme.colors.gray[0],
+          },
+          main: {
+            background: theme.colorScheme === "dark" ? theme.colors.dark[8] : theme.colors.gray[0],
+            height: "100%",
+          },
+          body: {
+            height: "100%",
+          },
+        }}
+      >
+        {children}
+      </AppShell>
+      <Global
+        styles={{
+          "#root": { display: "flex", position: "absolute", top: 0, left: 0, width: "100%", height: "100%" },
+        }}
+      />
+    </>
   );
 };

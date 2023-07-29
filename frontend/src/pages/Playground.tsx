@@ -32,7 +32,7 @@ export const PlaygroundPage = () => {
 
   const form = useForm({
     initialValues: {
-      mode: "complete",
+      mode: "chat",
       model: models[0]?.value ?? "",
       temperature: 0.75,
       topP: 1,
@@ -53,6 +53,12 @@ export const PlaygroundPage = () => {
       // streaming
       if (values.stream) {
         let output = "";
+
+        const role = form.values.mode === "complete" ? "system" : "assistant";
+        const message = { id: nanoid(), role, text: "" };
+        let messageIndex = form.values.mode === "complete" ? 1 : form.values.messages.length;
+        let messageIsInserted = false;
+
         await complete.stream(
           {
             vendor: "openai",
@@ -69,21 +75,17 @@ export const PlaygroundPage = () => {
           },
           (chunk: string) => {
             output += chunk;
+            message.text = output;
 
-            const role = form.values.mode === "complete" ? "system" : "assistant";
-            const message = { id: nanoid(), role, text: output };
-
-            if (role === "system") {
-              if (values.messages[1]?.role === "system") {
-                form.setFieldValue("messages.1", message);
-              } else {
-                form.insertListItem("messages", message, 1);
-              }
-            } else {
+            if (!messageIsInserted && form.values.messages.length - 1 < messageIndex) {
               form.insertListItem("messages", message);
+              messageIsInserted = true;
             }
+
+            form.setFieldValue(`messages.${messageIndex}`, message);
           }
         );
+
         setStatus("idle");
         return;
       }

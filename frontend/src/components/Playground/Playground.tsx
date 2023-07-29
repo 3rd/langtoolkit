@@ -161,7 +161,7 @@ export const Playground = ({ form, models, status, onSubmit, roles }: Playground
   return (
     <Stack sx={{ flex: 1, height: "100%", paddingBottom: "2rem" }}>
       {/* content */}
-      <form style={{ display: "flex", flex: 1 }} onSubmit={form.onSubmit(handleSubmit)}>
+      <form style={{ display: "flex", flex: 1, overflow: "auto" }} onSubmit={form.onSubmit(handleSubmit)}>
         <Flex gap="md" sx={{ flex: 1 }}>
           {/* left */}
           <Stack sx={{ flex: 1 }}>

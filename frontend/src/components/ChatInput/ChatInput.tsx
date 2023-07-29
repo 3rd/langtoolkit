@@ -34,16 +34,23 @@ export const ChatInput = ({ messages, roles, onChangeMessage, onDeleteMessage, o
   });
 
   return (
-    <ScrollArea sx={{ flex: 1 }}>
-      <Box>
+    <Stack sx={{ flex: 1, overflow: "hidden" }}>
+      <ScrollArea
+        bg="gray.1"
+        sx={(theme) => ({
+          flex: 1,
+          border: `1px solid ${theme.colorScheme === "dark" ? theme.colors.dark[6] : theme.colors.gray[3]}`,
+          borderRadius: theme.radius.sm,
+        })}
+      >
         {messageItems}
+      </ScrollArea>
 
-        <Stack align="center">
-          <Button color="gray" size="xs" leftIcon={<IconPlus size="1rem" />} variant="outline" onClick={onNewMessage}>
-            Add message
-          </Button>
-        </Stack>
-      </Box>
-    </ScrollArea>
+      <Stack align="center">
+        <Button color="gray" size="xs" leftIcon={<IconPlus size="1rem" />} variant="outline" onClick={onNewMessage}>
+          Add message
+        </Button>
+      </Stack>
+    </Stack>
   );
 };

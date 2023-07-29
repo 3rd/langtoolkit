@@ -23,36 +23,19 @@ export const ChatInputMessage = ({ role, text, availableRoles, onChange, onDelet
         flexDirection: role === "user" ? "row-reverse" : "row",
         alignItems: "center",
       }}
+      px="sm"
     >
-      <Box
+      <Stack
         sx={{
-          display: "flex",
-          flexDirection: "column",
           alignItems: role === "user" ? "flex-end" : "flex-start",
-          width: "80%",
+          flex: 1,
+          maxWidth: "calc(100% - 72px)",
         }}
       >
         {/* bubble */}
         <Stack
           align={role === "user" ? "flex-end" : "flex-start"}
           sx={(theme) => ({
-            // backgroundColor:
-            //   role === "user"
-            //     ? theme.colorScheme === "dark"
-            //       ? theme.colors.blue[9]
-            //       : theme.colors.blue[0]
-            //     : theme.colorScheme === "dark"
-            //     ? theme.colors.dark[6]
-            //     : theme.colors.gray[2],
-            // border: `1px solid ${
-            //   role === "user"
-            //     ? theme.colorScheme === "dark"
-            //       ? theme.colors.blue[9]
-            //       : theme.colors.blue[2]
-            //     : theme.colorScheme === "dark"
-            //     ? theme.colors.dark[6]
-            //     : theme.colors.gray[3]
-            // }`,
             padding: theme.spacing.xs,
             borderRadius: theme.radius.sm,
             textAlign: "left",
@@ -118,7 +101,7 @@ export const ChatInputMessage = ({ role, text, availableRoles, onChange, onDelet
             onChange={handleTextChange}
           />
         </Stack>
-      </Box>
+      </Stack>
     </Box>
   );
 };

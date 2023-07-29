@@ -9,6 +9,7 @@ import { RecipesPage } from "./pages/Recipes";
 import { SettingsPage } from "./pages/Settings";
 import { ProfilePage } from "./pages/Profile";
 import { UsersPage } from "./pages/Users";
+import { LogsPage } from "./pages/Logs";
 
 const Page = ({ component: Component }: { component: React.ComponentType }) => {
   const { user, logout } = useAuth();
@@ -41,6 +42,10 @@ export const router = createBrowserRouter([
   {
     path: "users",
     element: <Page component={UsersPage} />,
+  },
+  {
+    path: "logs",
+    element: <Page component={LogsPage} />,
   },
   {
     path: "settings",
