@@ -2,6 +2,8 @@ package llm
 
 import (
 	"context"
+	"errors"
+	"io"
 
 	openai "github.com/sashabaranov/go-openai"
 )
@@ -67,4 +69,36 @@ func CompleteOpenAI(apiKey string, request *CompletionRequest) (*openai.ChatComp
 	}
 
 	return &res, nil
+}
+
+func StreamOpenAI(apiKey string, request *CompletionRequest, callback func(openai.ChatCompletionStreamResponse)) error {
+	// transform messages
+	openAIMessages := make([]openai.ChatCompletionMessage, len(request.Messages))
+	for i, message := range request.Messages {
+		openAIMessages[i] = openai.ChatCompletionMessage{
+			Role:    message.Role,
+			Content: message.Text,
+		}
+	}
+
+	config := ComputeOpenAICompletionConfig(request)
+	config.Messages = openAIMessages
+
+	client := openai.NewClient(apiKey)
+	stream, err := client.CreateChatCompletionStream(context.Background(), config)
+	if err != nil {
+		return err
+	}
+	defer stream.Close()
+
+	for {
+		res, err := stream.Recv()
+		if errors.Is(err, io.EOF) {
+			return nil
+		}
+		if err != nil {
+			return err
+		}
+		callback(res)
+	}
 }

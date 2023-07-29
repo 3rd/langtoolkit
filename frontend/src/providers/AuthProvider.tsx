@@ -41,10 +41,9 @@ export const UserProvider = ({ children }: UserProviderProps) => {
   }, [handleLogin, handleLogout, handleRefresh, user]);
 
   useEffect(() => {
-    auth.refresh();
     return auth.authStore.onChange(() => {
       setUser(auth.getUser());
-    });
+    }, true);
   }, []);
 
   return <UserContext.Provider value={contextValue}>{children}</UserContext.Provider>;

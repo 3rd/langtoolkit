@@ -28,6 +28,7 @@ import {
   IconSun,
   IconMoonStars,
   IconUsers,
+  IconScribble,
 } from "@tabler/icons-react";
 import { ReactNode, useState } from "react";
 
@@ -98,6 +99,7 @@ const config: Link[] = [
   { label: "Dashboard", icon: IconDashboard, to: "/dashboard" },
   { label: "Playground", icon: IconJacket, to: "/playground" },
   { label: "Recipes", icon: IconBook, to: "/recipes" },
+  { label: "Logs", icon: IconScribble, to: "/logs" },
   { label: "Users", icon: IconUsers, to: "/users" },
   {
     label: "Settings",
@@ -171,7 +173,8 @@ export const Shell = ({ children, user, onLogout }: ShellProps) => {
           {/* left */}
           <Text>LangToolkit</Text>
 
-          <Group position="center" my={30}>
+          {/* theme switcher */}
+          <Group position="center">
             <Switch
               checked={colorScheme === "dark"}
               onChange={() => toggleColorScheme()}

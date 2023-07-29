@@ -52,9 +52,10 @@ export type CompletionsRecord<Tinput = unknown, Tparameters = unknown, Tresponse
 	source: CompletionsSourceOptions
 	parameters?: null | Tparameters
 	response?: null | Tresponse
+	output?: string
 	error?: string
-	consumedAt?: IsoDateString
-	resolvedAt?: IsoDateString
+	consumed_at?: IsoDateString
+	resolved_at?: IsoDateString
 }
 
 export type SettingsRecord<Tvalue = unknown> = {

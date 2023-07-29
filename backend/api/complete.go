@@ -1,6 +1,8 @@
 package api
 
 import (
+	"encoding/json"
+	"fmt"
 	"log"
 	"main/llm"
 	"time"
@@ -9,6 +11,7 @@ import (
 	"github.com/pocketbase/pocketbase/apis"
 	"github.com/pocketbase/pocketbase/daos"
 	"github.com/pocketbase/pocketbase/models"
+	"github.com/sashabaranov/go-openai"
 )
 
 func Complete(dao *daos.Dao) echo.HandlerFunc {
@@ -63,34 +66,77 @@ func Complete(dao *daos.Dao) echo.HandlerFunc {
 				})
 			}
 
-			// request completion from OpenAI
-			resp, err := llm.CompleteOpenAI(settings.OpenAIAPIKey, request)
+			// streaming mode
+			if config.Stream {
+				chunks := make([]openai.ChatCompletionStreamResponse, 0)
+				output := ""
 
-			// fail
-			if err != nil {
-				record.Set("status", "error")
-				record.Set("error", err.Error())
+				w := c.Response().Writer
+				handler := func(resp openai.ChatCompletionStreamResponse) {
+					chunks = append(chunks, resp)
+					output += resp.Choices[0].Delta.Content
+
+					serializedDelta, _ := json.Marshal(resp.Choices[0].Delta.Content)
+					fmt.Fprintf(w, "%s\n", string(serializedDelta))
+					c.Response().Flush()
+				}
+
+				err := llm.StreamOpenAI(settings.OpenAIAPIKey, request, handler)
+
+				// fail
+				if err != nil {
+					record.Set("status", "error")
+					record.Set("error", err.Error())
+					record.Set("resolved_at", time.Now())
+					if err := dao.SaveRecord(record); err != nil {
+						return err
+					}
+					return c.JSON(500, &echo.Map{
+						"id":    record.Get("id").(string),
+						"error": err.Error(),
+					})
+				}
+
+				// success
+				record.Set("status", "success")
+				record.Set("response", chunks)
 				record.Set("resolved_at", time.Now())
+				record.Set("output", output)
 				if err := dao.SaveRecord(record); err != nil {
 					return err
 				}
-				return c.JSON(500, &echo.Map{
-					"id":    record.Get("id").(string),
-					"error": err.Error(),
+				return nil
+			} else {
+				// regular completion mode
+				resp, err := llm.CompleteOpenAI(settings.OpenAIAPIKey, request)
+
+				// fail
+				if err != nil {
+					record.Set("status", "error")
+					record.Set("error", err.Error())
+					record.Set("resolved_at", time.Now())
+					if err := dao.SaveRecord(record); err != nil {
+						return err
+					}
+					return c.JSON(500, &echo.Map{
+						"id":    record.Get("id").(string),
+						"error": err.Error(),
+					})
+				}
+
+				// success
+				record.Set("status", "success")
+				record.Set("response", resp)
+				record.Set("resolved_at", time.Now())
+				record.Set("output", resp.Choices[0].Message.Content)
+				if err := dao.SaveRecord(record); err != nil {
+					return err
+				}
+				return c.JSON(200, llm.CompletionResponse{
+					ID:   record.Get("id").(string),
+					Text: resp.Choices[0].Message.Content,
 				})
 			}
-
-			// success
-			record.Set("status", "success")
-			record.Set("response", resp)
-			record.Set("resolved_at", time.Now())
-			if err := dao.SaveRecord(record); err != nil {
-				return err
-			}
-			return c.JSON(200, llm.CompletionResponse{
-				ID:   record.Get("id").(string),
-				Text: resp.Choices[0].Message.Content,
-			})
 		}
 
 		log.Println("record", record.Get("id"))

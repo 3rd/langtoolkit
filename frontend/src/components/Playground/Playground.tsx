@@ -1,11 +1,25 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { ScrollArea, Box, Stack, Flex, Text, Select, TextInput, Button, Group, Textarea } from "@mantine/core";
+import { useCallback, useMemo, useState } from "react";
+import {
+  Box,
+  Stack,
+  Flex,
+  Text,
+  Select,
+  TextInput,
+  Button,
+  Group,
+  Textarea,
+  CopyButton,
+  Tooltip,
+  ActionIcon,
+  Switch,
+} from "@mantine/core";
 import { UseFormReturnType } from "@mantine/form";
 import { z } from "zod";
 import { ChatInput, ChatInputProps } from "../ChatInput";
 import { nanoid } from "nanoid";
 import { CompletionInput } from "../CompletionInput";
-import { IconFileText, IconMessageChatbot } from "@tabler/icons-react";
+import { IconCheck, IconCopy, IconFileText, IconMessageChatbot } from "@tabler/icons-react";
 
 const modes = [
   { value: "complete", label: "Complete", icon: <IconFileText /> },
@@ -31,6 +45,7 @@ export const schema = z.object({
       text: z.string(),
     })
   ),
+  stream: z.boolean(),
 });
 
 export type PlaygroundModel = { value: string; label: string };
@@ -85,6 +100,9 @@ export const Playground = ({ form, models, status, onSubmit, roles }: Playground
     const updatedMessages = [...form.values.messages, { id: nanoid(), role: roles[0], text: "" }];
     form.setFieldValue("messages", updatedMessages);
   };
+  const handleClearMessages = () => {
+    form.setFieldValue("messages", [{ id: nanoid(), role: roles[0], text: "" }]);
+  };
 
   // TODO: UX - only keep the first message when switching from chat to complete?
   // request user confirmation?
@@ -97,50 +115,69 @@ export const Playground = ({ form, models, status, onSubmit, roles }: Playground
 
     const value = form.values.messages[1].text;
 
-    return <Textarea value={value} label="Output" minRows={14} readOnly />;
+    return (
+      <Textarea
+        value={value}
+        label="Output"
+        styles={{
+          root: {
+            display: "flex",
+            flexDirection: "column",
+            flex: 1,
+          },
+          wrapper: {
+            display: "flex",
+            flexDirection: "column",
+            flex: 1,
+          },
+          input: {
+            flex: 1,
+          },
+        }}
+        readOnly
+        rightSection={
+          <CopyButton value={value} timeout={2000}>
+            {({ copied, copy }) => (
+              <Tooltip label={copied ? "Copied" : "Copy"} withArrow position="right">
+                <ActionIcon color={copied ? "teal" : "gray"} onClick={copy}>
+                  {copied ? <IconCheck size="1rem" /> : <IconCopy size="1rem" />}
+                </ActionIcon>
+              </Tooltip>
+            )}
+          </CopyButton>
+        }
+        rightSectionProps={{
+          style: {
+            bottom: "auto",
+            top: "0",
+            transform: "translateY(calc(-100% - 2px))",
+            zIndex: 1,
+          },
+        }}
+      />
+    );
   }, [form]);
 
   return (
-    <Stack sx={{ flex: 1, overflow: "hidden", height: "100%", paddingBottom: "2rem" }}>
+    <Stack sx={{ flex: 1, height: "100%", paddingBottom: "2rem" }}>
       {/* content */}
-      <form style={{ display: "flex", flex: 1, overflow: "hidden" }} onSubmit={form.onSubmit(handleSubmit)}>
+      <form style={{ display: "flex", flex: 1 }} onSubmit={form.onSubmit(handleSubmit)}>
         <Flex gap="md" sx={{ flex: 1 }}>
           {/* left */}
           <Stack sx={{ flex: 1 }}>
             {/* input */}
-            <ScrollArea
-              styles={(theme) => ({
-                root: {
-                  flex: 1,
-                  border:
-                    theme.colorScheme === "dark"
-                      ? `1px solid ${theme.colors.gray[8]}`
-                      : `1px solid ${theme.colors.gray[4]}`,
-                  borderRadius: theme.radius.sm,
-                  paddingTop: theme.spacing.sm,
-                  paddingBottom: theme.spacing.sm,
-                },
-                viewport: {
-                  height: "100%",
-                  "& > div": {
-                    height: "100%",
-                  },
-                },
-              })}
-            >
-              {form.values.mode === "complete" && (
-                <CompletionInput value={firstMessage.text} onChange={handleCompletionInput} />
-              )}
-              {form.values.mode === "chat" && (
-                <ChatInput
-                  messages={form.values.messages}
-                  roles={roles}
-                  onChangeMessage={handleChangeMessage}
-                  onDeleteMessage={handleDeleteMessage}
-                  onNewMessage={handleNewMessage}
-                />
-              )}
-            </ScrollArea>
+            {form.values.mode === "complete" && (
+              <CompletionInput value={firstMessage.text} onChange={handleCompletionInput} />
+            )}
+            {form.values.mode === "chat" && (
+              <ChatInput
+                messages={form.values.messages}
+                roles={roles}
+                onChangeMessage={handleChangeMessage}
+                onDeleteMessage={handleDeleteMessage}
+                onNewMessage={handleNewMessage}
+              />
+            )}
 
             {/* output */}
             {outputArea}
@@ -150,8 +187,8 @@ export const Playground = ({ form, models, status, onSubmit, roles }: Playground
               <Button loading={status === "loading"} color="blue" type="submit">
                 Submit
               </Button>
-              <Button color="red" onClick={form.reset}>
-                Reset
+              <Button color="red" onClick={handleClearMessages}>
+                Clear
               </Button>
             </Flex>
           </Stack>
@@ -190,6 +227,9 @@ export const Playground = ({ form, models, status, onSubmit, roles }: Playground
               >
                 {/* model */}
                 <Select data={models} label="Model" placeholder="gpt-4" {...form.getInputProps("model")} />
+
+                {/* stream */}
+                <Switch label="Stream response" checked={form.values.stream} {...form.getInputProps("stream")} />
 
                 {/* temp & top p */}
                 <Group position="apart" spacing="sm">
