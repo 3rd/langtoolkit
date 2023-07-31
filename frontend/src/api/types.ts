@@ -4,6 +4,7 @@
 
 export enum Collections {
 	Completions = "completions",
+	Models = "models",
 	Settings = "settings",
 	Users = "users",
 }
@@ -58,6 +59,18 @@ export type CompletionsRecord<Tinput = unknown, Tparameters = unknown, Tresponse
 	resolved_at?: IsoDateString
 }
 
+export enum ModelsVendorOptions {
+	"openai" = "openai",
+	"anthropic" = "anthropic",
+	"custom" = "custom",
+}
+export type ModelsRecord = {
+	vendor?: ModelsVendorOptions
+	model?: string
+	enabled?: boolean
+	available?: boolean
+}
+
 export type SettingsRecord<Tvalue = unknown> = {
 	key: string
 	value?: null | Tvalue
@@ -75,6 +88,7 @@ export type UsersRecord = {
 
 // Response types include system fields and match responses from the PocketBase API
 export type CompletionsResponse<Tinput = unknown, Tparameters = unknown, Tresponse = unknown, Texpand = unknown> = Required<CompletionsRecord<Tinput, Tparameters, Tresponse>> & BaseSystemFields<Texpand>
+export type ModelsResponse<Texpand = unknown> = Required<ModelsRecord> & BaseSystemFields<Texpand>
 export type SettingsResponse<Tvalue = unknown, Texpand = unknown> = Required<SettingsRecord<Tvalue>> & BaseSystemFields<Texpand>
 export type UsersResponse<Texpand = unknown> = Required<UsersRecord> & AuthSystemFields<Texpand>
 
@@ -82,12 +96,14 @@ export type UsersResponse<Texpand = unknown> = Required<UsersRecord> & AuthSyste
 
 export type CollectionRecords = {
 	completions: CompletionsRecord
+	models: ModelsRecord
 	settings: SettingsRecord
 	users: UsersRecord
 }
 
 export type CollectionResponses = {
 	completions: CompletionsResponse
+	models: ModelsResponse
 	settings: SettingsResponse
 	users: UsersResponse
 }

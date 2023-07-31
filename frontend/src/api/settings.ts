@@ -1,3 +1,4 @@
+/* eslint-disable no-await-in-loop */
 import { useEffect, useState } from "react";
 import set from "lodash/set";
 import get from "lodash/get";
@@ -43,11 +44,11 @@ const getSettings = async (): Promise<Settings> => {
 const updateSettings = async (settings: Partial<Settings>): Promise<Settings | null> => {
   let lastRecord: Settings | null = null;
 
-  const items = Object.entries(fieldMap).reduce((acc, [key, path]) => {
+  const items = Object.entries(fieldMap).reduce<Record<string, unknown>>((acc, [key, path]) => {
     const value = get(settings, path);
     if (value !== undefined) acc[key] = value;
     return acc;
-  }, {} as Record<string, unknown>);
+  }, {});
 
   for (const [key, value] of Object.entries(items)) {
     const record = await pb.collection("settings").getFirstListItem<SettingsResponse>(`key = "${key}"`);
@@ -70,9 +71,9 @@ const useSettings = () => {
         const data = await getSettings();
         if (signal.aborted) return;
         setState(data);
-      } catch (e: unknown) {
-        if (e instanceof ClientResponseError && e.isAbort) return;
-        throw e;
+      } catch (error: unknown) {
+        if (error instanceof ClientResponseError && error.isAbort) return;
+        throw error;
       }
     })();
 

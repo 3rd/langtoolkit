@@ -26,6 +26,14 @@ export type Settings = {
   };
 };
 
+export type Model = {
+  id: string;
+  vendor: string;
+  model: string;
+  enabled: boolean;
+  available: boolean;
+};
+
 export type Mode = "chat" | "complete" | "nshot";
 
 export type Message = {

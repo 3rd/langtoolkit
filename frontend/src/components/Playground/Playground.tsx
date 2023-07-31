@@ -19,7 +19,7 @@ import { nanoid } from "nanoid";
 import { IconCheck, IconCopy, IconFileText, IconMessageChatbot } from "@tabler/icons-react";
 import { ChatInput, ChatInputProps } from "../ChatInput";
 import { CompletionInput } from "../CompletionInput";
-import { Mode } from "@/types";
+import { Mode, Model } from "@/types";
 import { NShotInput } from "../NShotInput";
 
 const modes = [
@@ -49,13 +49,12 @@ export const schema = z.object({
   stream: z.boolean(),
 });
 
-export type PlaygroundModel = { value: string; label: string };
 export type PlaygroundStatus = "error" | "idle" | "loading";
 export type PlaygroundRequest = z.infer<typeof schema>;
 
 export interface PlaygroundProps {
   mode: Mode;
-  models: PlaygroundModel[];
+  models: Model[];
   roles: string[];
   form: UseFormReturnType<z.infer<typeof schema>>;
   lastMeta?: { id: string; elapsedSeconds: number } | null;
@@ -228,7 +227,12 @@ export const Playground = ({
               })}
             >
               {/* model */}
-              <Select data={models} label="Model" placeholder="gpt-4" {...form.getInputProps("model")} />
+              <Select
+                data={models.map((model) => model.model)}
+                label="Model"
+                placeholder="gpt-4"
+                {...form.getInputProps("model")}
+              />
 
               {/* stream */}
               <Switch checked={form.values.stream} label="Stream response" {...form.getInputProps("stream")} />

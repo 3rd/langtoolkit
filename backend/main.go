@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"main/api"
+	"main/llm"
 
 	_ "main/migrations"
 	"net/http"
@@ -21,6 +22,7 @@ func main() {
 		Automigrate: true,
 	})
 
+	// add routes
 	app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
 		e.Router.AddRoute(echo.Route{
 			Method:  http.MethodPost,
@@ -31,6 +33,20 @@ func main() {
 				apis.RequireRecordAuth("users"),
 			},
 		})
+		return nil
+	})
+
+	// hooks
+	app.OnRecordAfterUpdateRequest("settings").Add(func(e *core.RecordUpdateEvent) error {
+		key := e.Record.Get("key")
+
+		// update OpenAI models
+		if key == "openai_api_key" {
+			apiKey := ""
+			e.Record.UnmarshalJSONField("value", &apiKey)
+			llm.UpdateOpenAIModels(app.Dao(), apiKey)
+		}
+
 		return nil
 	})
 
