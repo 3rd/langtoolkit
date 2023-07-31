@@ -36,10 +36,10 @@ export const ChatInput = ({ messages, roles, onChangeMessage, onDeleteMessage, o
   return (
     <Stack sx={{ flex: 1, overflow: "hidden" }}>
       <ScrollArea
-        bg="gray.1"
         sx={(theme) => ({
           flex: 1,
           border: `1px solid ${theme.colorScheme === "dark" ? theme.colors.dark[6] : theme.colors.gray[3]}`,
+          backgroundColor: theme.colorScheme === "dark" ? theme.colors.dark[7] : theme.white,
           borderRadius: theme.radius.sm,
         })}
       >

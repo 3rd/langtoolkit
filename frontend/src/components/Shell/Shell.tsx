@@ -190,7 +190,7 @@ export const Shell = ({ children, user, onLogout }: ShellProps) => {
   );
 
   const navbar = (
-    <Navbar hidden={!isOpened} hiddenBreakpoint="sm" width={{ sm: 200, lg: 300 }}>
+    <Navbar hidden={!isOpened} hiddenBreakpoint="sm" width={{ sm: 200 }}>
       {/* navigation */}
       <Navbar.Section component={ScrollArea} grow>
         {getLinks(config)}

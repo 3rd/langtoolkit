@@ -25,3 +25,11 @@ export type Settings = {
     }[];
   };
 };
+
+export type Mode = "chat" | "complete" | "nshot";
+
+export type Message = {
+  id: string;
+  role: string;
+  text: string;
+};

@@ -27,6 +27,8 @@ func Complete(dao *daos.Dao) echo.HandlerFunc {
 			return err
 		}
 
+		consumedAt := time.Now()
+
 		// create completion record
 		completionsCollection, err := dao.FindCollectionByNameOrId("completions")
 		if err != nil {
@@ -36,7 +38,7 @@ func Complete(dao *daos.Dao) echo.HandlerFunc {
 		record.Set("user", user.Id)
 		record.Set("source", "playground")
 		record.Set("status", "pending")
-		record.Set("consumed_at", time.Now())
+		record.Set("consumed_at", consumedAt)
 		record.Set("vendor", request.Vendor)
 		record.Set("model", request.Model)
 		record.Set("input", request.Messages)
@@ -82,12 +84,13 @@ func Complete(dao *daos.Dao) echo.HandlerFunc {
 				}
 
 				err := llm.StreamOpenAI(settings.OpenAIAPIKey, request, handler)
+				resolvedAt := time.Now()
 
 				// fail
 				if err != nil {
 					record.Set("status", "error")
 					record.Set("error", err.Error())
-					record.Set("resolved_at", time.Now())
+					record.Set("resolved_at", resolvedAt)
 					if err := dao.SaveRecord(record); err != nil {
 						return err
 					}
@@ -100,43 +103,63 @@ func Complete(dao *daos.Dao) echo.HandlerFunc {
 				// success
 				record.Set("status", "success")
 				record.Set("response", chunks)
-				record.Set("resolved_at", time.Now())
+				record.Set("resolved_at", resolvedAt)
 				record.Set("output", output)
 				if err := dao.SaveRecord(record); err != nil {
 					return err
 				}
-				return nil
-			} else {
-				// regular completion mode
-				resp, err := llm.CompleteOpenAI(settings.OpenAIAPIKey, request)
 
-				// fail
+				// meta
+				meta, err := json.Marshal(struct {
+					Type           string  `json:"type"`
+					ID             string  `json:"id"`
+					ElapsedSeconds float64 `json:"elapsedSeconds"`
+					Text           string  `json:"text"`
+				}{
+					Type:           "end",
+					ID:             record.Get("id").(string),
+					ElapsedSeconds: resolvedAt.Sub(consumedAt).Seconds(),
+					Text:           output,
+				})
 				if err != nil {
-					record.Set("status", "error")
-					record.Set("error", err.Error())
-					record.Set("resolved_at", time.Now())
-					if err := dao.SaveRecord(record); err != nil {
-						return err
-					}
-					return c.JSON(500, &echo.Map{
-						"id":    record.Get("id").(string),
-						"error": err.Error(),
-					})
+					return err
 				}
+				fmt.Fprintf(w, "%s\n", string(meta))
 
-				// success
-				record.Set("status", "success")
-				record.Set("response", resp)
-				record.Set("resolved_at", time.Now())
-				record.Set("output", resp.Choices[0].Message.Content)
+				return nil
+			}
+
+			// regular completion mode
+			resp, err := llm.CompleteOpenAI(settings.OpenAIAPIKey, request)
+			resolvedAt := time.Now()
+
+			// fail
+			if err != nil {
+				record.Set("status", "error")
+				record.Set("error", err.Error())
+				record.Set("resolved_at", resolvedAt)
 				if err := dao.SaveRecord(record); err != nil {
 					return err
 				}
-				return c.JSON(200, llm.CompletionResponse{
-					ID:   record.Get("id").(string),
-					Text: resp.Choices[0].Message.Content,
+				return c.JSON(500, &echo.Map{
+					"id":    record.Get("id").(string),
+					"error": err.Error(),
 				})
 			}
+
+			// success
+			record.Set("status", "success")
+			record.Set("response", resp)
+			record.Set("resolved_at", resolvedAt)
+			record.Set("output", resp.Choices[0].Message.Content)
+			if err := dao.SaveRecord(record); err != nil {
+				return err
+			}
+			return c.JSON(200, llm.CompletionResponse{
+				ID:             record.Get("id").(string),
+				ElapsedSeconds: resolvedAt.Sub(consumedAt).Seconds(),
+				Text:           resp.Choices[0].Message.Content,
+			})
 		}
 
 		log.Println("record", record.Get("id"))

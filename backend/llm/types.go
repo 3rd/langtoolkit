@@ -29,6 +29,7 @@ type CompletionRequest struct {
 }
 
 type CompletionResponse struct {
-	ID   string `json:"id"`
-	Text string `json:"text"`
+	ID             string  `json:"id"`
+	ElapsedSeconds float64 `json:"elapsedSeconds"`
+	Text           string  `json:"text"`
 }

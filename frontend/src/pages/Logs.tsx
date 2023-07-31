@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Text } from "@mantine/core";
+import { Stack, Text } from "@mantine/core";
 import { DataTable } from "mantine-datatable";
 import { useCompletions } from "@/api/completions";
 import { CompletionsResponse } from "@/api/types";
@@ -13,7 +13,7 @@ const render = {
     return (
       <>
         {contextMessagesCount > 0 && (
-          <Text size="sm" color="gray" style={{ marginBottom: 5 }}>
+          <Text color="gray" size="sm" style={{ marginBottom: 5 }}>
             ... {contextMessagesCount} other messages
           </Text>
         )}
@@ -43,25 +43,30 @@ export const LogsPage = () => {
   }, [data]);
 
   return (
-    <DataTable
-      withBorder
-      borderRadius="sm"
-      withColumnBorders
-      striped
-      highlightOnHover
-      columns={[
-        { accessor: "id", width: "1%" },
-        { accessor: "user", width: "1%" },
-        { accessor: "source", width: "1%" },
-        { accessor: "model", width: "1%" },
-        { accessor: "input", width: 100, render: render.input, ellipsis: true },
-        { accessor: "output", width: 200, ellipsis: true },
-      ]}
-      records={records}
-      page={page}
-      recordsPerPage={PER_PAGE}
-      totalRecords={data?.totalItems || 0}
-      onPageChange={setPage}
-    />
+    <Stack h="100%">
+      <Text size="xl" style={{ marginBottom: 10 }} weight={700}>
+        Logs
+      </Text>
+      <DataTable
+        borderRadius="sm"
+        columns={[
+          { accessor: "id", width: "1%" },
+          { accessor: "user", width: "1%" },
+          { accessor: "source", width: "1%" },
+          { accessor: "model", width: "1%" },
+          { accessor: "input", width: 100, render: render.input, ellipsis: true },
+          { accessor: "output", width: 100, ellipsis: true },
+        ]}
+        page={page}
+        records={records}
+        recordsPerPage={PER_PAGE}
+        totalRecords={data?.totalItems ?? 0}
+        highlightOnHover
+        striped
+        withBorder
+        withColumnBorders
+        onPageChange={setPage}
+      />
+    </Stack>
   );
 };

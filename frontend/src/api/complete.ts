@@ -19,6 +19,7 @@ type CompleteRequest = {
 
 type CompleteResponse = {
   id: string;
+  elapsedSeconds: number;
   text: string;
 };
 
@@ -31,7 +32,10 @@ const complete = async (request: CompleteRequest): Promise<CompleteResponse> => 
   return response.json();
 };
 
-const stream = async (request: CompleteRequest, callback: any) => {
+const stream = async (
+  request: CompleteRequest,
+  callback: (chunk: string | { type: string; id: string; elapsedSeconds: number; text: string }) => void
+) => {
   return new Promise<void>((resolve, reject) => {
     http("complete", {
       method: "POST",
@@ -49,8 +53,8 @@ const stream = async (request: CompleteRequest, callback: any) => {
                   try {
                     const data = JSON.parse(line);
                     callback(data);
-                  } catch (e) {
-                    reject(e);
+                  } catch (error) {
+                    reject(error);
                   }
                 }
               }
