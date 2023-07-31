@@ -118,10 +118,10 @@ export const Playground = ({
     form.setFieldValue("messages", [{ id: nanoid(), role: roles[0], text: "" }]);
   };
 
-  // TODO: UX - only keep the first message when switching from chat to complete?
-  // request user confirmation?
-  // could keep the rest of the messages but not use them in the call
+  // getters
   const firstMessage = form.values.messages[0];
+  const lastMessage = form.values.messages[form.values.messages.length - 1];
+  const isSubmitDisabled = mode === "chat" && lastMessage.role === "assistant";
 
   const outputArea = useMemo(() => {
     if (mode !== "complete") return null;
@@ -155,7 +155,7 @@ export const Playground = ({
         readOnly
       />
     );
-  }, [form]);
+  }, [form, mode]);
 
   return (
     <Stack sx={{ flex: 1, height: "100%", paddingBottom: "2rem" }}>
@@ -188,10 +188,10 @@ export const Playground = ({
             {outputArea}
 
             {/* footer */}
-            <Flex gap="md" align="center" justify="space-between">
+            <Flex align="center" gap="md" justify="space-between">
               {/* actions */}
               <Flex gap="md">
-                <Button color="blue" loading={status === "loading"} type="submit">
+                <Button color="blue" disabled={isSubmitDisabled} loading={status === "loading"} type="submit">
                   Submit
                 </Button>
                 <Button color="red" onClick={handleClearMessages}>
