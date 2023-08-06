@@ -1,4 +1,4 @@
-import { Box, Button, ScrollArea, Stack } from "@mantine/core";
+import { Button, ScrollArea, Stack } from "@mantine/core";
 import { IconPlus } from "@tabler/icons-react";
 import { ChatInputMessage } from "./ChatInputMessage";
 
@@ -34,23 +34,31 @@ export const ChatInput = ({ messages, roles, onChangeMessage, onDeleteMessage, o
   });
 
   return (
-    <Stack sx={{ flex: 1, overflow: "hidden" }}>
-      <ScrollArea
+    <>
+      <Stack
         sx={(theme) => ({
           flex: 1,
-          border: `1px solid ${theme.colorScheme === "dark" ? theme.colors.dark[6] : theme.colors.gray[3]}`,
-          backgroundColor: theme.colorScheme === "dark" ? theme.colors.dark[7] : theme.white,
-          borderRadius: theme.radius.sm,
+          overflow: "hidden",
+          boxShadow: theme.shadows.md,
         })}
       >
-        {messageItems}
-      </ScrollArea>
+        <ScrollArea
+          sx={(theme) => ({
+            flex: 1,
+            border: `1px solid ${theme.colorScheme === "dark" ? theme.colors.dark[6] : theme.colors.gray[3]}`,
+            backgroundColor: theme.colorScheme === "dark" ? theme.colors.dark[7] : theme.white,
+            borderRadius: theme.radius.sm,
+          })}
+        >
+          {messageItems}
+        </ScrollArea>
+      </Stack>
 
       <Stack align="center">
-        <Button color="gray" size="xs" leftIcon={<IconPlus size="1rem" />} variant="outline" onClick={onNewMessage}>
+        <Button color="gray" leftIcon={<IconPlus size="1rem" />} size="xs" variant="outline" onClick={onNewMessage}>
           Add message
         </Button>
       </Stack>
-    </Stack>
+    </>
   );
 };
