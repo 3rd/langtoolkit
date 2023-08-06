@@ -44,8 +44,6 @@ const getSettings = async (): Promise<Settings> => {
 };
 
 const updateSettings = async (settings: Partial<Settings>): Promise<Settings | null> => {
-  let lastRecord: Settings | null = null;
-
   const items = Object.entries(fieldMap).reduce<Record<string, unknown>>((acc, [key, path]) => {
     const value = get(settings, path);
     if (value !== undefined) acc[key] = value;
@@ -55,10 +53,10 @@ const updateSettings = async (settings: Partial<Settings>): Promise<Settings | n
   for (const [key, value] of Object.entries(items)) {
     const record = await pb.collection("settings").getFirstListItem<SettingsResponse>(`key = "${key}"`);
     if (!record) throw new Error(`Invalid settings key: ${key}`);
-    lastRecord = await pb.collection("settings").update(record.id, { value });
+    await pb.collection("settings").update(record.id, { value });
   }
 
-  return lastRecord;
+  return getSettings();
 };
 
 const useSettings = () => {

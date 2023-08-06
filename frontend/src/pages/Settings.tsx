@@ -2,7 +2,7 @@ import { useModels } from "@/api/models";
 import { useSettings } from "@/api/settings";
 import { Model } from "@/types";
 import { Badge, Button, Card, Flex, Paper, PasswordInput, Stack, Switch, Table, Tabs, Text } from "@mantine/core";
-import { useForm, zodResolver } from "@mantine/form";
+import { UseFormReturnType, useForm, zodResolver } from "@mantine/form";
 import { IconPhoto } from "@tabler/icons-react";
 import { useEffect } from "react";
 import { z } from "zod";
@@ -25,17 +25,23 @@ const schema = z.object({
         headers: z.record(z.string()),
       })
     ),
+    enabledMap: z.record(z.boolean()),
   }),
 });
 
-const ModelList = ({ disabled, models }: { disabled: boolean; models: Model[] }) => {
+type ModelListProps = {
+  disabled: boolean;
+  models: Model[];
+  form: UseFormReturnType<z.infer<typeof schema>>;
+};
+const ModelList = ({ disabled, models, form }: ModelListProps) => {
   return (
     <Stack>
       <Text size="md" weight="bold">
         Models
       </Text>
       <Card padding="0" withBorder>
-        <Table striped highlightOnHover>
+        <Table highlightOnHover striped>
           <thead>
             <tr>
               <th>Name</th>
@@ -54,10 +60,11 @@ const ModelList = ({ disabled, models }: { disabled: boolean; models: Model[] })
                 {/* toggle */}
                 <td>
                   <Switch
-                    styles={{ root: { display: "flex", justifyContent: "flex-end" } }}
-                    size="sm"
-                    checked={model.enabled}
+                    checked={form.values.models.enabledMap[model.id]}
                     disabled={disabled || !model.available}
+                    size="sm"
+                    styles={{ root: { display: "flex", justifyContent: "flex-end" } }}
+                    {...form.getInputProps(`models.enabledMap.${model.id}`)}
                   />
                 </td>
               </tr>
@@ -71,10 +78,10 @@ const ModelList = ({ disabled, models }: { disabled: boolean; models: Model[] })
 
 export const SettingsPage = () => {
   const [settings, setSettings] = useSettings();
-  const models = useModels();
+  const [models, setEnabledModels] = useModels();
 
-  const form = useForm({
-    initialValues: settings,
+  const form = useForm<z.infer<typeof schema>>({
+    initialValues: { ...settings, models: { ...settings.models, enabledMap: {} } },
     validate: zodResolver(schema),
   });
 
@@ -83,13 +90,22 @@ export const SettingsPage = () => {
 
   const handleSubmit = (values: z.infer<typeof schema>) => {
     setSettings(values);
+    setEnabledModels(values.models.enabledMap);
   };
 
   useEffect(() => {
-    form.setValues(settings);
-    form.resetDirty(settings);
+    const enabledMap = Object.fromEntries(models.map((model) => [model.id, model.enabled]));
+    const values = { ...settings, models: { ...settings.models, enabledMap } };
+    form.setValues(values);
+    form.resetDirty(values);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [settings]);
+
+  useEffect(() => {
+    const enabledMap = Object.fromEntries(models.map((model) => [model.id, model.enabled]));
+    form.setFieldValue("models.enabledMap", enabledMap);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [models]);
 
   return (
     <Stack>
@@ -134,7 +150,7 @@ export const SettingsPage = () => {
                   />
                   {/* models */}
                   {openaiModels.length > 0 && (
-                    <ModelList disabled={!form.values.models.openai.enabled} models={openaiModels} />
+                    <ModelList disabled={!form.values.models.openai.enabled} form={form} models={openaiModels} />
                   )}
                 </Stack>
               </Paper>
@@ -162,7 +178,7 @@ export const SettingsPage = () => {
                   />
                   {/* models */}
                   {anthropicModels.length > 0 && (
-                    <ModelList disabled={!form.values.models.anthropic.enabled} models={anthropicModels} />
+                    <ModelList disabled={!form.values.models.anthropic.enabled} form={form} models={anthropicModels} />
                   )}
                 </Stack>
               </Paper>

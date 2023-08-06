@@ -32,6 +32,15 @@ const getModels = async (opts?: GetModelsOptions): Promise<Model[]> => {
   }));
 };
 
+const setEnabledModels = async (enabledMap: Record<string, boolean>) => {
+  const models = await getModels();
+  const promises = models.map((model) => {
+    const enabled = enabledMap[model.id] ?? model.enabled;
+    return pb.collection("models").update(model.id, { enabled });
+  });
+  await Promise.all(promises);
+};
+
 const useModels = (opts?: GetModelsOptions) => {
   const [state, setState] = useState<Model[]>([]);
 
@@ -54,9 +63,15 @@ const useModels = (opts?: GetModelsOptions) => {
     return () => {
       controller.abort();
     };
-  }, []);
+  }, [opts]);
 
-  return state;
+  const setEnabled = async (enabledMap: Record<string, boolean>) => {
+    await setEnabledModels(enabledMap);
+    const data = await getModels(opts);
+    setState(data);
+  };
+
+  return [state, setEnabled] as const;
 };
 
 export { getModels, useModels };

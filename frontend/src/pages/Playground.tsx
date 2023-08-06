@@ -25,11 +25,13 @@ const getDefaultMessagesForMode = (mode: Mode) => {
   return [{ id: nanoid(), role: "system", text: "" }];
 };
 
+const modelOptions = { enabled: true, available: true };
+
 export const PlaygroundPage = () => {
   const [mode, setMode] = useState<Mode>(restoredMode ?? defaultMode);
   const [status, setStatus] = useState<PlaygroundStatus>("idle");
   const [lastMeta, setLastMeta] = useState<{ id: string; elapsedSeconds: number } | null>(null);
-  const models = useModels();
+  const [models] = useModels(modelOptions);
 
   const form = useForm({
     initialValues: {
