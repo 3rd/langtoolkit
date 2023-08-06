@@ -4,10 +4,24 @@ import { Model } from "@/types";
 import { pb } from "./client";
 import { ModelsResponse } from "./types";
 import { ClientResponseError } from "pocketbase";
+import { getSettings } from "./settings";
 
-const getModels = async (): Promise<Model[]> => {
+type GetModelsOptions = {
+  enabled?: boolean;
+  available?: boolean;
+};
+
+const getModels = async (opts?: GetModelsOptions): Promise<Model[]> => {
+  const filter = [];
+  if (opts) {
+    if (opts.enabled !== undefined) filter.push(`enabled = ${opts.enabled}`);
+    if (opts.available !== undefined) filter.push(`available = ${opts.available}`);
+  }
+
   const records = await pb.collection("models").getFullList<ModelsResponse>({
     sort: "-external_created_at",
+    filter: filter.join(" && "),
+    $autoCancel: false,
   });
   return records.map((record) => ({
     id: record.id,
@@ -18,7 +32,7 @@ const getModels = async (): Promise<Model[]> => {
   }));
 };
 
-const useModels = () => {
+const useModels = (opts?: GetModelsOptions) => {
   const [state, setState] = useState<Model[]>([]);
 
   useEffect(() => {
@@ -27,7 +41,9 @@ const useModels = () => {
 
     (async () => {
       try {
-        const data = await getModels();
+        const settings = await getSettings();
+        if (!settings.models.openai.enabled) return;
+        const data = await getModels(opts);
         if (signal.aborted) return;
         setState(data);
       } catch (error: unknown) {

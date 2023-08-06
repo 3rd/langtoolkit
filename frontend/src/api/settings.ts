@@ -31,7 +31,9 @@ const fieldMap: Record<string, string> = {
 const getSettings = async (): Promise<Settings> => {
   const settings = getDefaultSettings();
 
-  const records = await pb.collection("settings").getFullList<SettingsResponse>();
+  const records = await pb.collection("settings").getFullList<SettingsResponse>({
+    $autoCancel: false,
+  });
   for (const record of records) {
     const path = fieldMap[record.key];
     if (get(settings, path) === undefined) throw new Error(`Invalid settings key: ${record.key}`);

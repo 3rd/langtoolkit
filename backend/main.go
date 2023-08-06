@@ -44,7 +44,9 @@ func main() {
 		if key == "openai_api_key" {
 			apiKey := ""
 			e.Record.UnmarshalJSONField("value", &apiKey)
-			llm.UpdateOpenAIModels(app.Dao(), apiKey)
+			if apiKey != "" {
+				llm.UpdateOpenAIModels(app.Dao(), apiKey)
+			}
 		}
 
 		return nil

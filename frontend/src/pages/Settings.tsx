@@ -1,7 +1,7 @@
 import { useModels } from "@/api/models";
 import { useSettings } from "@/api/settings";
 import { Model } from "@/types";
-import { Badge, Box, Button, Card, Flex, Paper, PasswordInput, Stack, Switch, Table, Tabs, Text } from "@mantine/core";
+import { Badge, Button, Card, Flex, Paper, PasswordInput, Stack, Switch, Table, Tabs, Text } from "@mantine/core";
 import { useForm, zodResolver } from "@mantine/form";
 import { IconPhoto } from "@tabler/icons-react";
 import { useEffect } from "react";
@@ -28,7 +28,7 @@ const schema = z.object({
   }),
 });
 
-const ModelList = ({ models }: { models: Model[] }) => {
+const ModelList = ({ disabled, models }: { disabled: boolean; models: Model[] }) => {
   return (
     <Stack>
       <Text size="md" weight="bold">
@@ -57,7 +57,7 @@ const ModelList = ({ models }: { models: Model[] }) => {
                     styles={{ root: { display: "flex", justifyContent: "flex-end" } }}
                     size="sm"
                     checked={model.enabled}
-                    disabled={!model.available}
+                    disabled={disabled || !model.available}
                   />
                 </td>
               </tr>
@@ -133,7 +133,9 @@ export const SettingsPage = () => {
                     {...form.getInputProps("models.openai.apiKey")}
                   />
                   {/* models */}
-                  {openaiModels.length > 0 && <ModelList models={openaiModels} />}
+                  {openaiModels.length > 0 && (
+                    <ModelList disabled={!form.values.models.openai.enabled} models={openaiModels} />
+                  )}
                 </Stack>
               </Paper>
 
@@ -159,7 +161,9 @@ export const SettingsPage = () => {
                     {...form.getInputProps("models.anthropic.apiKey")}
                   />
                   {/* models */}
-                  {anthropicModels.length > 0 && <ModelList models={anthropicModels} />}
+                  {anthropicModels.length > 0 && (
+                    <ModelList disabled={!form.values.models.anthropic.enabled} models={anthropicModels} />
+                  )}
                 </Stack>
               </Paper>
 
