@@ -90,10 +90,10 @@ type Link = {
   icon: React.FC<any>;
 } & (
   | {
-      to: string;
+      children: Link[];
     }
   | {
-      children: Link[];
+      to: string;
     }
 );
 const config: Link[] = [
@@ -120,12 +120,12 @@ const getLinks = (links: Link[]) => {
       return (
         <MantineNavLink
           key={item.to}
-          component={NavLink}
-          to={item.to}
           className={classes.link}
+          component={NavLink}
           icon={<item.icon className={classes.linkIcon} size="1.2rem" strokeWidth={1.5} />}
           label={item.label}
-        ></MantineNavLink>
+          to={item.to}
+        />
       );
     }
 
@@ -178,10 +178,10 @@ export const Shell = ({ children, user, onLogout }: ShellProps) => {
           <Group position="center">
             <Switch
               checked={colorScheme === "dark"}
-              onChange={() => toggleColorScheme()}
-              size="lg"
-              onLabel={<IconSun color={theme.white} size="1.25rem" stroke={1.5} />}
               offLabel={<IconMoonStars color={theme.colors.gray[6]} size="1.25rem" stroke={1.5} />}
+              size="lg"
+              onChange={() => toggleColorScheme()}
+              onLabel={<IconSun color={theme.white} size="1.25rem" stroke={1.5} />}
             />
           </Group>
         </Flex>
@@ -199,9 +199,9 @@ export const Shell = ({ children, user, onLogout }: ShellProps) => {
       {/* footer */}
       <Navbar.Section className={classes.footer}>
         {/* user */}
-        <NavLink className={cx(classes.link, classes.user)} to={"/profile"}>
+        <NavLink className={cx(classes.link, classes.user)} to="/profile">
           <Group>
-            <Avatar bg="cyan" src={user.avatar} radius="xl" />
+            <Avatar bg="cyan" radius="xl" src={user.avatar} />
             <div style={{ flex: 1 }}>
               <Text size="sm" weight={500}>
                 {user.name}
@@ -214,11 +214,11 @@ export const Shell = ({ children, user, onLogout }: ShellProps) => {
         </NavLink>
         {/* logout */}
         <MantineNavLink
-          icon={<IconLogout className={classes.linkIcon} size="1rem" />}
           className={classes.link}
+          icon={<IconLogout className={classes.linkIcon} size="1rem" />}
+          label="Logout"
           variant="white"
           onClick={onLogout}
-          label="Logout"
         />
       </Navbar.Section>
     </Navbar>

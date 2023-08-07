@@ -38,12 +38,12 @@ export const PlaygroundPage = () => {
       mode: restoredMode ?? defaultMode,
       model: restoredParams?.model ?? models[0]?.id ?? "",
       temperature: restoredParams?.temperature ?? 0.75,
-      topP: restoredParams?.topP ?? 1,
-      stopSequences: restoredParams?.stop ?? [],
+      top_p: restoredParams?.top_p ?? 1,
+      stop_pequences: restoredParams?.stop ?? [],
       messages: restoredParams?.messages ?? getDefaultMessagesForMode(restoredMode ?? defaultMode),
-      frequencyPenalty: restoredParams?.frequencyPenalty ?? 0,
-      presencePenalty: restoredParams?.presencePenalty ?? 0,
-      maxTokens: restoredParams?.maxTokens ?? 64,
+      frequency_penalty: restoredParams?.frequency_penalty ?? 0,
+      presence_penalty: restoredParams?.presence_penalty ?? 0,
+      max_tokens: restoredParams?.max_tokens ?? "",
       stream: restoredParams?.stream ?? false,
     } as z.infer<typeof schema>,
     validate: zodResolver(schema),
@@ -52,6 +52,9 @@ export const PlaygroundPage = () => {
   const handleSubmit = useCallback(
     async (values: z.infer<typeof schema>) => {
       setStatus("loading");
+
+      const model = models.find((m) => m.id === values.model);
+      if (!model) throw new Error(`Model ${values.model} not found`);
 
       // streaming
       if (values.stream) {
@@ -64,16 +67,16 @@ export const PlaygroundPage = () => {
         await complete.stream(
           {
             vendor: "openai",
-            model: values.model,
+            model: model.model,
             messages: mode === "complete" ? [values.messages[0]] : values.messages,
             parameters: {
               temperature: values.temperature,
-              topP: values.topP,
-              stop: values.stopSequences,
-              frequencyPenalty: values.frequencyPenalty,
-              presencePenalty: values.presencePenalty,
+              top_p: values.top_p,
+              stop: values.stop_pequences,
+              frequency_penalty: values.frequency_penalty,
+              presence_penalty: values.presence_penalty,
               // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
-              maxTokens: values.maxTokens || undefined,
+              max_tokens: values.max_tokens || undefined,
             },
           },
           (chunk) => {
@@ -100,16 +103,16 @@ export const PlaygroundPage = () => {
       // regular completion
       const response = await complete.complete({
         vendor: "openai",
-        model: values.model,
+        model: model.model,
         messages: mode === "complete" ? [values.messages[0]] : values.messages,
         parameters: {
           temperature: values.temperature,
-          topP: values.topP,
-          stop: values.stopSequences,
-          frequencyPenalty: values.frequencyPenalty,
-          presencePenalty: values.presencePenalty,
+          top_p: values.top_p,
+          stop: values.stop_pequences,
+          frequency_penalty: values.frequency_penalty,
+          presence_penalty: values.presence_penalty,
           // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
-          maxTokens: values.maxTokens || undefined,
+          max_tokens: values.max_tokens || undefined,
         },
       });
 
@@ -120,10 +123,9 @@ export const PlaygroundPage = () => {
       }
 
       setLastMeta({ id: response.id, elapsedSeconds: response.elapsedSeconds });
-
       setStatus("idle");
     },
-    [form, mode]
+    [form, mode, models]
   );
 
   // persist state to local storage
@@ -133,31 +135,33 @@ export const PlaygroundPage = () => {
   useEffect(() => {
     local.playground[mode].set({
       model: form.values.model,
-      temperature: form.values.temperature,
-      topP: form.values.topP,
-      stop: form.values.stopSequences,
       messages: form.values.messages,
-      frequencyPenalty: form.values.frequencyPenalty,
-      presencePenalty: form.values.presencePenalty,
-      maxTokens: form.values.maxTokens as number | undefined,
+      temperature: form.values.temperature,
+      top_p: form.values.top_p,
+      stop: form.values.stop_pequences,
+      frequency_penalty: form.values.frequency_penalty,
+      presence_penalty: form.values.presence_penalty,
+      max_tokens: form.values.max_tokens as number | undefined,
       stream: form.values.stream,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [form.values]);
 
-  // reset on mode change
+  // restore state on mode change
+  const handleChangeMode = useCallback((value: Mode) => setMode(value), []);
   useEffect(() => {
     const params = local.playground[mode].get();
-    form.setValues({
-      ...form.values,
-      ...params,
-    });
+    form.setValues({ ...form.values, ...params });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mode]);
 
-  const handleChangeMode = useCallback((value: Mode) => {
-    setMode(value);
-  }, []);
+  // set first model as default if not set
+  useEffect(() => {
+    if (form.values.model === "" && models.length > 0) {
+      form.setFieldValue("model", models[0].id);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form.values.model, models]);
 
   return (
     <Playground

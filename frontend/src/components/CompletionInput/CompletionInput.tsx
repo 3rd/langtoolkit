@@ -1,59 +1,29 @@
 import { memo } from "react";
-import { ActionIcon, Box, CopyButton, Textarea, Tooltip } from "@mantine/core";
+import { ActionIcon, CopyButton, Textarea, Tooltip } from "@mantine/core";
 import { IconCheck, IconCopy } from "@tabler/icons-react";
+import { Message } from "@/types";
 
 export interface CompletionInputProps {
-  value: string;
-  onChange: (value: string) => void;
+  value: Message[];
+  onChange: (messages: Message[]) => void;
 }
 
-// {/* <Box */}
-// {/*   sx={(theme) => ({ */}
-// {/*     paddingLeft: theme.spacing.md, */}
-// {/*     paddingRight: theme.spacing.md, */}
-// {/*     height: "100%", */}
-// {/*   })} */}
-// {/* > */}
-// {/*   <Textarea */}
-// {/*     placeholder="Act as if you want to make a difference..." */}
-// {/*     size="md" */}
-// {/*     styles={{ */}
-// {/*       root: { height: "100%" }, */}
-// {/*       wrapper: { height: "100%" }, */}
-// {/*       input: { height: "100%" }, */}
-// {/*     }} */}
-// {/*     value={value} */}
-// {/*     variant="unstyled" */}
-// {/*     withAsterisk */}
-// {/*     onChange={(event) => onChange(event.currentTarget.value)} */}
-// {/*   /> */}
-// {/* </Box> */}
-
 export const CompletionInput = memo(({ value, onChange }: CompletionInputProps) => {
+  if (value.length === 0 || value.length > 2) throw new Error(`CompletionInput received ${value.length} messages`);
+
+  const message = value[0];
+
+  const handleChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+    onChange([{ ...message, text: event.currentTarget.value }, ...value.slice(1)]);
+  };
+
   return (
     <Textarea
-      value={value}
-      onChange={(event) => onChange(event.currentTarget.value)}
       label="Input"
-      styles={{
-        root: {
-          display: "flex",
-          flexDirection: "column",
-          flex: 1,
-        },
-        wrapper: {
-          display: "flex",
-          flexDirection: "column",
-          flex: 1,
-        },
-        input: {
-          flex: 1,
-        },
-      }}
       rightSection={
-        <CopyButton value={value} timeout={2000}>
+        <CopyButton timeout={2000} value={message.text}>
           {({ copied, copy }) => (
-            <Tooltip label={copied ? "Copied" : "Copy"} withArrow position="right">
+            <Tooltip label={copied ? "Copied" : "Copy"} position="right" withArrow>
               <ActionIcon color={copied ? "teal" : "gray"} onClick={copy}>
                 {copied ? <IconCheck size="1rem" /> : <IconCopy size="1rem" />}
               </ActionIcon>
@@ -69,6 +39,23 @@ export const CompletionInput = memo(({ value, onChange }: CompletionInputProps) 
           zIndex: 1,
         },
       }}
+      styles={{
+        root: {
+          display: "flex",
+          flexDirection: "column",
+          flex: 1,
+        },
+        wrapper: {
+          display: "flex",
+          flexDirection: "column",
+          flex: 1,
+        },
+        input: {
+          flex: 1,
+        },
+      }}
+      value={message.text}
+      onChange={handleChange}
     />
   );
 });

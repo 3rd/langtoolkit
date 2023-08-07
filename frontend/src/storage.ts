@@ -2,14 +2,14 @@ import { Message, Mode } from "./types";
 
 export type PlaygroundStandardStorage = {
   model: string;
-  stream: boolean;
-  temperature?: number;
-  topP: number;
-  frequencyPenalty: number;
-  presencePenalty: number;
-  stop: string[];
-  maxTokens: number;
   messages: Message[];
+  max_tokens: number;
+  temperature?: number;
+  top_p: number;
+  stream: boolean;
+  stop: string[];
+  frequency_penalty: number;
+  presence_penalty: number;
 };
 
 const createBucket = <T>(key: string) => {

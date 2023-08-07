@@ -1,15 +1,15 @@
 import { Navigate, createBrowserRouter, useLocation } from "react-router-dom";
 import { useAuth } from "./providers/AuthProvider";
 import { Shell } from "./components/Shell";
-import { LoginPage } from "./pages/Login";
+import { LoginPage } from "./pages/login";
 import { NotFoundPage } from "./pages/404";
-import { DashboardPage } from "./pages/Dashboard";
-import { PlaygroundPage } from "./pages/Playground";
-import { RecipesPage } from "./pages/Recipes";
-import { SettingsPage } from "./pages/Settings";
-import { ProfilePage } from "./pages/Profile";
-import { UsersPage } from "./pages/Users";
-import { LogsPage } from "./pages/Logs";
+import { DashboardPage } from "./pages/dashboard";
+import { PlaygroundPage } from "./pages/playground";
+import { RecipesPage } from "./pages/recipes";
+import { SettingsPage } from "./pages/settings";
+import { ProfilePage } from "./pages/profile";
+import { UsersPage } from "./pages/users";
+import { LogsPage } from "./pages/logs";
 
 const Page = ({ component: Component }: { component: React.ComponentType }) => {
   const { user, logout } = useAuth();

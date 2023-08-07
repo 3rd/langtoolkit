@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import {
   Stack,
   Flex,
@@ -17,9 +17,9 @@ import { UseFormReturnType } from "@mantine/form";
 import { z } from "zod";
 import { nanoid } from "nanoid";
 import { IconCheck, IconCopy, IconFileText, IconMessageChatbot } from "@tabler/icons-react";
-import { ChatInput, ChatInputProps } from "../ChatInput";
+import { ChatInput } from "../ChatInput";
 import { CompletionInput } from "../CompletionInput";
-import { Mode, Model } from "@/types";
+import { Message, Mode, Model } from "@/types";
 import { NShotInput } from "../NShotInput";
 
 const modes = [
@@ -31,14 +31,14 @@ const modes = [
 export const schema = z.object({
   model: z.string(),
   temperature: z.coerce.number().min(0).max(1).optional(),
-  topP: z.coerce.number().min(0).max(1).optional(),
-  maxTokens: z.preprocess(
+  top_p: z.coerce.number().min(0).max(1).optional(),
+  max_tokens: z.preprocess(
     (value) => (value === "" ? undefined : value),
     z.union([z.literal(""), z.coerce.number().min(1)]).optional()
   ),
-  stopSequences: z.array(z.string()),
-  frequencyPenalty: z.coerce.number().min(0).max(2).optional(),
-  presencePenalty: z.coerce.number().min(0).max(2).optional(),
+  stop_pequences: z.array(z.string()),
+  frequency_penalty: z.coerce.number().min(0).max(2).optional(),
+  presence_penalty: z.coerce.number().min(0).max(2).optional(),
   messages: z.array(
     z.object({
       id: z.string(),
@@ -78,13 +78,13 @@ export const Playground = ({
   // param handlers
   const handleAddStopSequence = () => {
     if (!newStopSequence) return;
-    form.setFieldValue("stopSequences", [...form.values.stopSequences, newStopSequence]);
+    form.setFieldValue("stopSequences", [...form.values.stop_pequences, newStopSequence]);
     setNewStopSequence("");
   };
   const handleRemoveStopSequence = (index: number) =>
     form.setFieldValue(
       "stopSequences",
-      form.values.stopSequences.filter((_, i) => i !== index)
+      form.values.stop_pequences.filter((_, i) => i !== index)
     );
 
   // form handlers
@@ -94,31 +94,10 @@ export const Playground = ({
   };
 
   // input handlers
-  const handleCompletionInput = useCallback(
-    (value: string) => {
-      form.setFieldValue("messages.0", { id: nanoid(), role: roles[0], text: value });
-    },
-    [form, roles]
-  );
-  const handleChangeMessage = (message: ChatInputProps["messages"][number]) => {
-    const updatedMessages = form.values.messages.map((m) => (m.id === message.id ? message : m));
-    form.setFieldValue("messages", updatedMessages);
-  };
-  const handleDeleteMessage = (messageId: string) => {
-    if (form.values.messages.length === 1) return;
-    const updatedMessages = form.values.messages.filter((m) => m.id !== messageId);
-    form.setFieldValue("messages", updatedMessages);
-  };
-  const handleNewMessage = () => {
-    const updatedMessages = [...form.values.messages, { id: nanoid(), role: roles[0], text: "" }];
-    form.setFieldValue("messages", updatedMessages);
-  };
-  const handleClearMessages = () => {
-    form.setFieldValue("messages", [{ id: nanoid(), role: roles[0], text: "" }]);
-  };
+  const handleChange = (value: Message[]) => form.setFieldValue("messages", value);
+  const handleClear = () => form.setFieldValue("messages", [{ id: nanoid(), role: roles[0], text: "" }]);
 
   // getters
-  const firstMessage = form.values.messages[0];
   const lastMessage = form.values.messages[form.values.messages.length - 1];
   const isSubmitDisabled = mode === "chat" && lastMessage.role === "assistant";
 
@@ -164,24 +143,9 @@ export const Playground = ({
           {/* left */}
           <Stack p="xs" sx={{ flex: 1 }}>
             {/* input */}
-            {mode === "complete" && <CompletionInput value={firstMessage.text} onChange={handleCompletionInput} />}
-            {mode === "chat" && (
-              <ChatInput
-                messages={form.values.messages}
-                roles={roles}
-                onChangeMessage={handleChangeMessage}
-                onDeleteMessage={handleDeleteMessage}
-                onNewMessage={handleNewMessage}
-              />
-            )}
-            {mode === "nshot" && (
-              <NShotInput
-                messages={form.values.messages}
-                onChangeMessage={handleChangeMessage}
-                onDeleteMessage={handleDeleteMessage}
-                onNewMessage={handleNewMessage}
-              />
-            )}
+            {mode === "complete" && <CompletionInput value={form.values.messages} onChange={handleChange} />}
+            {mode === "chat" && <ChatInput roles={roles} value={form.values.messages} onChange={handleChange} />}
+            {mode === "nshot" && <NShotInput value={form.values.messages} onChange={handleChange} />}
 
             {/* output */}
             {outputArea}
@@ -193,7 +157,7 @@ export const Playground = ({
                 <Button color="blue" disabled={isSubmitDisabled} loading={status === "loading"} type="submit">
                   Submit
                 </Button>
-                <Button color="red" onClick={handleClearMessages}>
+                <Button color="red" onClick={handleClear}>
                   Clear
                 </Button>
               </Flex>
@@ -228,9 +192,9 @@ export const Playground = ({
             >
               {/* model */}
               <Select
-                data={models.map((model) => model.model)}
+                data={models.map((model) => ({ value: model.id, label: model.model }))}
                 label="Model"
-                placeholder="gpt-4"
+                placeholder=""
                 {...form.getInputProps("model")}
               />
 
@@ -260,7 +224,7 @@ export const Playground = ({
                   step={0.01}
                   sx={{ flex: 1 }}
                   type="number"
-                  {...form.getInputProps("topP")}
+                  {...form.getInputProps("top_p")}
                 />
               </Group>
 
@@ -271,7 +235,7 @@ export const Playground = ({
                 placeholder="Infinity"
                 sx={{ flex: 1 }}
                 type="number"
-                {...form.getInputProps("maxTokens")}
+                {...form.getInputProps("max_tokens")}
               />
 
               {/* frequency & presence penalty */}
@@ -285,7 +249,7 @@ export const Playground = ({
                   step={0.01}
                   sx={{ flex: 1 }}
                   type="number"
-                  {...form.getInputProps("frequencyPenalty")}
+                  {...form.getInputProps("frequency_penalty")}
                 />
 
                 {/* presence penalty */}
@@ -297,7 +261,7 @@ export const Playground = ({
                   step={0.01}
                   sx={{ flex: 1 }}
                   type="number"
-                  {...form.getInputProps("presencePenalty")}
+                  {...form.getInputProps("presence_penalty")}
                 />
               </Group>
 
@@ -313,9 +277,9 @@ export const Playground = ({
                   Add
                 </Button>
               </Group>
-              {form.values.stopSequences.length > 0 && (
+              {form.values.stop_pequences.length > 0 && (
                 <Stack p="sm" spacing="none">
-                  {form.values.stopSequences.map((item, index) => (
+                  {form.values.stop_pequences.map((item, index) => (
                     // eslint-disable-next-line react/no-array-index-key
                     <Flex key={`${item}-${index}`} sx={{ display: "flex", flex: 1, justifyContent: "space-between" }}>
                       <Text sx={{ flex: 1 }}>&quot;{item}&quot;</Text>

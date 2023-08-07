@@ -1,6 +1,6 @@
 import { http } from ".";
 
-type CompleteRequest = {
+type CompletionRequest = {
   vendor: string;
   model: string;
   messages: {
@@ -8,22 +8,22 @@ type CompleteRequest = {
     text: string;
   }[];
   parameters?: {
-    maxTokens?: number;
+    max_tokens?: number;
     temperature?: number;
-    topP?: number;
-    presencePenalty?: number;
-    frequencyPenalty?: number;
+    top_p?: number;
+    presence_penalty?: number;
+    frequency_penalty?: number;
     stop?: string[];
   };
 };
 
-type CompleteResponse = {
+type CompletionResponse = {
   id: string;
   elapsedSeconds: number;
   text: string;
 };
 
-const complete = async (request: CompleteRequest): Promise<CompleteResponse> => {
+const complete = async (request: CompletionRequest): Promise<CompletionResponse> => {
   const response = await http("complete", {
     method: "POST",
     body: JSON.stringify(request),
@@ -33,7 +33,7 @@ const complete = async (request: CompleteRequest): Promise<CompleteResponse> => 
 };
 
 const stream = async (
-  request: CompleteRequest,
+  request: CompletionRequest,
   callback: (chunk: string | { type: string; id: string; elapsedSeconds: number; text: string }) => void
 ) => {
   return new Promise<void>((resolve, reject) => {

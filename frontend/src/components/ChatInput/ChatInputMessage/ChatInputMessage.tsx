@@ -76,7 +76,7 @@ export const ChatInputMessage = ({ role, text, availableRoles, onChange, onDelet
       />
 
       {/* actions and role switcher */}
-      <Flex align="center" gap="sm">
+      <Flex align="center" gap="xs">
         {/* role */}
         <Select
           data={selectOptions}

@@ -1,3 +1,4 @@
+import { Message } from "@/types";
 import { Box, Button, ScrollArea, Stack, Textarea } from "@mantine/core";
 import { IconPlus } from "@tabler/icons-react";
 
@@ -21,29 +22,39 @@ const NShotExampleInput = ({ index, value, onChange }: NShotExampleInput) => {
 };
 
 export interface NShotInputProps {
-  messages: {
-    id: string;
-    role: string;
-    text: string;
-  }[];
-  onChangeMessage: (message: NShotInputProps["messages"][number]) => void;
-  onDeleteMessage: (messageId: string) => void;
-  onNewMessage: () => void;
+  value: Message[];
+  onChange: (messages: Message[]) => void;
 }
 
-export const NShotInput = ({ messages, onChangeMessage, onDeleteMessage, onNewMessage }: NShotInputProps) => {
-  const handleMessageChange = (messageId: string, role: string, text: string) =>
-    onChangeMessage({ id: messageId, role, text });
+export const NShotInput = ({ value, onChange }: NShotInputProps) => {
+  const handleChangeMessage = (messageId: string, role: string, text: string) => {
+    const newMessages = value.map((message) => {
+      if (message.id === messageId) return { ...message, role, text };
+      return message;
+    });
+    onChange(newMessages);
+  };
 
-  const exampleItems = messages.map((message) => {
-    const handleChange = (role: string, text: string) => handleMessageChange(message.id, role, text);
-    const handleDelete = () => onDeleteMessage(message.id);
+  const handleDeleteMessage = (messageId: string) => {
+    const newMessages = value.filter((message) => message.id !== messageId);
+    onChange(newMessages);
+  };
 
+  const handleAddMessage = () => {
+    const newMessages = [...value, { id: Math.random().toString(), role: "", text: "" }];
+    onChange(newMessages);
+  };
+
+  const samples = value.map((message) => {
+    const handleChange = (role: string, text: string) => handleChangeMessage(message.id, role, text);
+    const handleDelete = () => handleDeleteMessage(message.id);
     return <div key={message.id}>x</div>;
   });
 
   return (
     <Stack sx={{ flex: 1, overflow: "hidden" }}>
+      {/* <Textarea label="System prompt" value={value} onChange={(event) => onChange(event.currentTarget.value)} /> */}
+
       <ScrollArea
         sx={(theme) => ({
           flex: 1,
@@ -52,11 +63,11 @@ export const NShotInput = ({ messages, onChangeMessage, onDeleteMessage, onNewMe
           borderRadius: theme.radius.sm,
         })}
       >
-        {exampleItems}
+        {samples}
       </ScrollArea>
 
       <Stack align="center">
-        <Button color="gray" leftIcon={<IconPlus size="1rem" />} size="xs" variant="outline" onClick={onNewMessage}>
+        <Button color="gray" leftIcon={<IconPlus size="1rem" />} size="xs" variant="outline" onClick={handleAddMessage}>
           Add item
         </Button>
       </Stack>

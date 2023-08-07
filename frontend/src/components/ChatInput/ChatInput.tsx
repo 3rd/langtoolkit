@@ -1,26 +1,36 @@
 import { Button, ScrollArea, Stack } from "@mantine/core";
 import { IconPlus } from "@tabler/icons-react";
 import { ChatInputMessage } from "./ChatInputMessage";
+import { Message } from "@/types";
 
 export interface ChatInputProps {
   roles: string[];
-  messages: {
-    id: string;
-    role: string;
-    text: string;
-  }[];
-  onChangeMessage: (message: ChatInputProps["messages"][number]) => void;
-  onDeleteMessage: (messageId: string) => void;
-  onNewMessage: () => void;
+  value: Message[];
+  onChange: (messages: Message[]) => void;
 }
 
-export const ChatInput = ({ messages, roles, onChangeMessage, onDeleteMessage, onNewMessage }: ChatInputProps) => {
-  const handleMessageChange = (messageId: string, role: string, text: string) =>
-    onChangeMessage({ id: messageId, role, text });
+export const ChatInput = ({ roles, value, onChange }: ChatInputProps) => {
+  const handleChangeMessage = (messageId: string, role: string, text: string) => {
+    const newMessages = value.map((message) => {
+      if (message.id === messageId) return { ...message, role, text };
+      return message;
+    });
+    onChange(newMessages);
+  };
 
-  const messageItems = messages.map((message, index) => {
-    const handleChange = (role: string, text: string) => handleMessageChange(message.id, role, text);
-    const handleDelete = () => onDeleteMessage(message.id);
+  const handleDeleteMessage = (messageId: string) => {
+    const newMessages = value.filter((message) => message.id !== messageId);
+    onChange(newMessages);
+  };
+
+  const handleAddMessage = () => {
+    const newMessages = [...value, { id: Math.random().toString(), role: "", text: "" }];
+    onChange(newMessages);
+  };
+
+  const messageItems = value.map((message, index) => {
+    const handleChange = (role: string, text: string) => handleChangeMessage(message.id, role, text);
+    const handleDelete = () => handleDeleteMessage(message.id);
 
     return (
       <ChatInputMessage
@@ -55,7 +65,7 @@ export const ChatInput = ({ messages, roles, onChangeMessage, onDeleteMessage, o
       </Stack>
 
       <Stack align="center">
-        <Button color="gray" leftIcon={<IconPlus size="1rem" />} size="xs" variant="outline" onClick={onNewMessage}>
+        <Button color="gray" leftIcon={<IconPlus size="1rem" />} size="xs" variant="outline" onClick={handleAddMessage}>
           Add message
         </Button>
       </Stack>
