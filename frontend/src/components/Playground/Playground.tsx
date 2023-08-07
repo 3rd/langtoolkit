@@ -99,7 +99,9 @@ export const Playground = ({
 
   // getters
   const lastMessage = form.values.messages[form.values.messages.length - 1];
-  const isSubmitDisabled = mode === "chat" && lastMessage.role === "assistant";
+  const isSubmitDisabled =
+    (mode === "chat" && lastMessage.role === "assistant") ||
+    (mode === "nshot" && lastMessage.role === "assistant" && lastMessage.text !== "");
 
   const outputArea = useMemo(() => {
     if (mode !== "complete") return null;
@@ -202,7 +204,7 @@ export const Playground = ({
               <Switch checked={form.values.stream} label="Stream response" {...form.getInputProps("stream")} />
 
               {/* temp & top p */}
-              <Group position="apart" spacing="sm">
+              <Flex gap="sm">
                 {/* temperature */}
                 <TextInput
                   label="Temperature"
@@ -226,7 +228,7 @@ export const Playground = ({
                   type="number"
                   {...form.getInputProps("top_p")}
                 />
-              </Group>
+              </Flex>
 
               {/* max tokens */}
               <TextInput
@@ -239,7 +241,7 @@ export const Playground = ({
               />
 
               {/* frequency & presence penalty */}
-              <Group position="apart" spacing="sm">
+              <Flex gap="sm">
                 {/* frequency penalty */}
                 <TextInput
                   label="Frequency penalty"
@@ -263,7 +265,7 @@ export const Playground = ({
                   type="number"
                   {...form.getInputProps("presence_penalty")}
                 />
-              </Group>
+              </Flex>
 
               {/* stop sequences */}
               <Group position="apart" spacing="sm" sx={{ flex: 1, alignItems: "flex-end" }}>

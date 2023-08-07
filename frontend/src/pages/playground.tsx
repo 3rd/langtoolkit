@@ -15,9 +15,14 @@ const restoredMode = local.playground.mode.get();
 const restoredParams = local.playground[restoredMode ?? defaultMode].get();
 
 const getDefaultMessagesForMode = (mode: Mode) => {
+  if (mode === "chat") {
+    return [{ id: nanoid(), role: "user", text: "" }];
+  }
   if (mode === "nshot") {
     return [
       { id: nanoid(), role: "system", text: "" },
+      { id: nanoid(), role: "user", text: "" },
+      { id: nanoid(), role: "assistant", text: "" },
       { id: nanoid(), role: "user", text: "" },
       { id: nanoid(), role: "assistant", text: "" },
     ];
@@ -56,19 +61,26 @@ export const PlaygroundPage = () => {
       const model = models.find((m) => m.id === values.model);
       if (!model) throw new Error(`Model ${values.model} not found`);
 
+      let messages = values.messages;
+      if (mode === "complete") messages = [values.messages[0]];
+      if (mode === "nshot") messages = values.messages.slice(0, -1);
+
+      let messageIndex = form.values.messages.length;
+      if (mode === "complete") messageIndex = 1;
+      if (mode === "nshot") messageIndex = form.values.messages.length - 1;
+
       // streaming
       if (values.stream) {
         let output = "";
         const role = mode === "complete" ? "system" : "assistant";
         const message = { id: nanoid(), role, text: "" };
-        const messageIndex = mode === "complete" ? 1 : form.values.messages.length;
         let messageIsInserted = false;
 
         await complete.stream(
           {
             vendor: "openai",
             model: model.model,
-            messages: mode === "complete" ? [values.messages[0]] : values.messages,
+            messages,
             parameters: {
               temperature: values.temperature,
               top_p: values.top_p,
@@ -104,7 +116,7 @@ export const PlaygroundPage = () => {
       const response = await complete.complete({
         vendor: "openai",
         model: model.model,
-        messages: mode === "complete" ? [values.messages[0]] : values.messages,
+        messages,
         parameters: {
           temperature: values.temperature,
           top_p: values.top_p,
@@ -118,6 +130,8 @@ export const PlaygroundPage = () => {
 
       if (mode === "complete") {
         form.setFieldValue("messages.1", { id: response.id, role: "system", text: response.text });
+      } else if (mode === "nshot") {
+        form.setFieldValue(`messages.${messageIndex}`, { id: response.id, role: "system", text: response.text });
       } else {
         form.insertListItem("messages", { id: response.id, role: "assistant", text: response.text });
       }
@@ -148,12 +162,19 @@ export const PlaygroundPage = () => {
   }, [form.values]);
 
   // restore state on mode change
-  const handleChangeMode = useCallback((value: Mode) => setMode(value), []);
+  const handleChangeMode = useCallback(
+    (value: Mode) => {
+      const restoredState = local.playground[value].get() ?? getDefaultMessagesForMode(value);
+      form.setValues({ ...form.values, ...restoredState });
+      setMode(value);
+    },
+    [form]
+  );
   useEffect(() => {
-    const params = local.playground[mode].get();
-    form.setValues({ ...form.values, ...params });
+    const restoredState = local.playground[mode].get();
+    if (restoredState) form.setValues({ ...form.values, ...restoredState });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mode]);
+  }, []);
 
   // set first model as default if not set
   useEffect(() => {
