@@ -164,17 +164,14 @@ export const PlaygroundPage = () => {
   // restore state on mode change
   const handleChangeMode = useCallback(
     (value: Mode) => {
-      const restoredState = local.playground[value].get() ?? getDefaultMessagesForMode(value);
+      const restoredState = local.playground[value].get() ?? {
+        messages: getDefaultMessagesForMode(value),
+      };
       form.setValues({ ...form.values, ...restoredState });
       setMode(value);
     },
     [form]
   );
-  useEffect(() => {
-    const restoredState = local.playground[mode].get();
-    if (restoredState) form.setValues({ ...form.values, ...restoredState });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   // set first model as default if not set
   useEffect(() => {
