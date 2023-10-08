@@ -42,7 +42,7 @@ const NShotSampleInput = ({ index, input, output, onChange, onDelete }: NShotSam
 
 const validateMessages = (messages: Message[]) => {
   if (messages.length < 3) throw new Error(`NShotInput received ${messages.length} messages`);
-  for (let i = 1; i < messages.length; i += 2) {
+  for (let i = 1; i < messages.length - 1; i += 2) {
     const [current, next] = [messages[i], messages[i + 1]];
     if (current && current.role !== "user") throw new Error(`Message #${i} is not an assistant message`);
     if (next && next.role !== "assistant") throw new Error(`Message #${i + 1} is not a user message`);

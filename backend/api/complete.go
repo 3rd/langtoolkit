@@ -111,15 +111,15 @@ func Complete(dao *daos.Dao) echo.HandlerFunc {
 
 				// meta
 				meta, err := json.Marshal(struct {
-					Type           string  `json:"type"`
-					ID             string  `json:"id"`
-					ElapsedSeconds float64 `json:"elapsedSeconds"`
-					Text           string  `json:"text"`
+					llm.CompletionResponse
+					Type string `json:"type"`
 				}{
-					Type:           "end",
-					ID:             record.Get("id").(string),
-					ElapsedSeconds: resolvedAt.Sub(consumedAt).Seconds(),
-					Text:           output,
+					Type: "end",
+					CompletionResponse: llm.CompletionResponse{
+						ID:             record.Get("id").(string),
+						ElapsedSeconds: resolvedAt.Sub(consumedAt).Seconds(),
+						Text:           output,
+					},
 				})
 				if err != nil {
 					return err

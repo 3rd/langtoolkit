@@ -72,8 +72,7 @@ export const PlaygroundPage = () => {
       // streaming
       if (values.stream) {
         let output = "";
-        const role = mode === "complete" ? "system" : "assistant";
-        const message = { id: nanoid(), role, text: "" };
+        const message = { id: nanoid(), role: "assistant", text: "" };
         let messageIsInserted = false;
 
         await complete.stream(
@@ -129,9 +128,9 @@ export const PlaygroundPage = () => {
       });
 
       if (mode === "complete") {
-        form.setFieldValue("messages.1", { id: response.id, role: "system", text: response.text });
+        form.setFieldValue("messages.1", { id: response.id, role: "assistant", text: response.text });
       } else if (mode === "nshot") {
-        form.setFieldValue(`messages.${messageIndex}`, { id: response.id, role: "system", text: response.text });
+        form.setFieldValue(`messages.${messageIndex}`, { id: response.id, role: "assistant", text: response.text });
       } else {
         form.insertListItem("messages", { id: response.id, role: "assistant", text: response.text });
       }

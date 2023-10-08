@@ -100,8 +100,7 @@ export const Playground = ({
   // getters
   const lastMessage = form.values.messages[form.values.messages.length - 1];
   const isSubmitDisabled =
-    (mode === "chat" && lastMessage.role === "assistant") ||
-    (mode === "nshot" && lastMessage.role === "assistant" && lastMessage.text !== "");
+    (mode === "chat" && lastMessage.role === "assistant") || (mode === "nshot" && lastMessage.role === "system");
 
   const outputArea = useMemo(() => {
     if (mode !== "complete") return null;

@@ -17,9 +17,9 @@ type CompletionParameters struct {
 	PresencePenalty  *float32                     `json:"presence_penalty,omitempty"`
 	FrequencyPenalty *float32                     `json:"frequency_penalty,omitempty"`
 	LogitBias        *map[string]int              `json:"logit_bias,omitempty"`
-	UserToken        *string                      `json:"user_token,omitempty"`
 	Functions        *[]openai.FunctionDefinition `json:"functions,omitempty"`
 	FunctionCall     *any                         `json:"function_call,omitempty"`
+	User             *string                      `json:"user,omitempty"`
 }
 
 type CompletionRequest struct {
