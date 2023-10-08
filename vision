@@ -1,0 +1,19 @@
+= Vision
+
+- Democratize LLM usage to reduce the growing gap between paper-following experts and normal people.
+- Provide an all-in-one LLM automation toolkit and runtime.
+- Provide the best prompt-engineering tools.
+- Provide an intuitive A/B testing, quality monitoring, and experimentation platform.
+- Provide easy to use automation tools that turn simple prompts and advanced workflows into web apps.
+- Visually create advanced node-based workflows with "agents".
+- Make common use cases simple to achieve (function calling for structured output, n-shot,
+  classification, sliding windows and context packing).
+- Automatically generate APIs for the generated apps.
+- Aggregate, trace, and monitor vendor calls.
+- Cache and re-use previous results.
+- Integrate with multiple vendors, both external and local.
+- Support multiple users, with roles, permissions, and granular access.
+  Be able to set it up at a company level and give your employees access to managed tools built on top of LLMs.
+  They only see and interact with the apps (generally one/multiple step(s) forms)
+- Provide templates for common patterns and educate the users on LLM techniques.
+
